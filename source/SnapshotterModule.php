@@ -20,7 +20,7 @@ class SnapshotterModule implements ModuleInterface
     public function register(RegistratorInterface $registrator)
     {
         $registrator->configure('views', 'namespaces', 'spiral/snapshotter', [
-            "'vault' => [",
+            "'snapshotter' => [",
             "   directory('libraries') . 'spiral/snapshotter/source/views/',",
             "   /*{{namespaces.snapshotter}}*/",
             "]"
@@ -35,7 +35,7 @@ class SnapshotterModule implements ModuleInterface
         ]);
 
         $registrator->configure('modules/vault', 'controllers', 'spiral/snapshotter', [
-            "'snapshots' => '\\Spiral\\Snapshotter\\Controllers\\SnapshotsController::class'",
+            "'snapshots' => \\Spiral\\Snapshotter\\Controllers\\SnapshotsController::class",
         ]);
 
         $registrator->configure('modules/vault', 'navigation', 'spiral/snapshotter', [
