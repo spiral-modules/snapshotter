@@ -34,7 +34,7 @@ class SnapshotsController extends Controller
     {
         //todo filter by active (has snapshots), all - NOW filter is hardcoded
         //todo graph
-        return $this->views->render('keeper:vault/snapshots/list', [
+        return $this->views->render('vault:snapshots/list', [
             'source'       => $source->findWithSnapshots()->orderBy('last_occurred_time', 'DESC'),
             'lastSnapshot' => $source->findLast(),
             'statistics'   => $statistics
@@ -63,7 +63,7 @@ class SnapshotsController extends Controller
 
         $this->authorize('view', compact('aggregation'));
 
-        return $this->views->render('keeper:vault/snapshots/aggregation', [
+        return $this->views->render('vault:snapshots/aggregation', [
             'source'      => $snapshotSource->findStored($aggregation)->orderBy('id', 'DESC'),
             'aggregation' => $aggregation
         ]);
@@ -109,7 +109,7 @@ class SnapshotsController extends Controller
 
         $this->authorize('view', compact('snapshot'));
 
-        return $this->views->render('keeper:vault/snapshots/snapshot', compact('snapshot'));
+        return $this->views->render('vault:snapshots/snapshot', compact('snapshot'));
     }
 
     /**
