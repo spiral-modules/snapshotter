@@ -53,6 +53,7 @@ class SnapshotsController extends Controller
         SnapshotSource $snapshotSource
     ) {
         //todo graph
+        //todo show snapshot at once, if there is one only
         /**
          * @var Aggregation $aggregation
          */
