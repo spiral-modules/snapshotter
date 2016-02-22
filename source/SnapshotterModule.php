@@ -19,16 +19,15 @@ class SnapshotterModule implements ModuleInterface
      */
     public function register(RegistratorInterface $registrator)
     {
+        $registrator->configure('tokenizer', 'directories', 'spiral/snapshotter', [
+            "directory('libraries') . 'spiral/snapshotter',",
+        ]);
+
         $registrator->configure('views', 'namespaces', 'spiral/snapshotter', [
             "'snapshotter' => [",
             "   directory('libraries') . 'spiral/snapshotter/source/views/',",
             "   /*{{namespaces.snapshotter}}*/",
             "]"
-        ]);
-
-        $registrator->configure('tokenizer', 'directories', 'spiral/snapshotter', [
-            "directory('libraries') . 'spiral/snapshotter',",
-            "/*{{directories,snapshotter}}*/",
         ]);
 
         $registrator->configure('databases', 'databases', 'spiral/snapshotter', [
