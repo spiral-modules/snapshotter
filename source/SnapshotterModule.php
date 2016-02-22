@@ -26,6 +26,11 @@ class SnapshotterModule implements ModuleInterface
             "]"
         ]);
 
+        $registrator->configure('tokenizer', 'directories', 'spiral/snapshotter', [
+            "directory('libraries') . 'spiral/snapshotter',",
+            "/*{{directories,snapshotter}}*/",
+        ]);
+
         $registrator->configure('databases', 'databases', 'spiral/snapshotter', [
             "'vault' => [",
             "   'connection'  => 'vault',",
