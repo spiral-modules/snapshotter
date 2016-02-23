@@ -64,10 +64,17 @@ class SnapshotsController extends Controller
 
         $this->authorize('view', compact('aggregation'));
 
-        return $this->views->render('snapshotter:aggregation', [
-            'source'      => $snapshotSource->findStored($aggregation)->orderBy('id', 'DESC'),
-            'aggregation' => $aggregation
-        ]);
+        $snapshot = null;
+        $source = $snapshotSource->findStored($aggregation)->orderBy('id', 'DESC');
+
+        if ($source->count() === 1) {
+            $snapshot = $source->findOne();
+        }
+
+        return $this->views->render(
+            'snapshotter:aggregation',
+            compact('source', 'snapshot', 'aggregation')
+        );
     }
 
     /**

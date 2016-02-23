@@ -3,8 +3,17 @@
 /**
  * @var \Spiral\Snapshotter\Database\Aggregation $aggregation
  * @var \Spiral\Snapshotter\Database\Snapshot    $entity
+ * @var \Spiral\Snapshotter\Database\Snapshot    $snapshot
  */
 ?>
+<define:resources>
+    <block:resources/>
+    <script language="javascript" type="text/javascript">
+        function resizeIframe(obj) {
+            obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+        }
+    </script>
+</define:resources>
 
 <define:actions>
     <?php
@@ -98,42 +107,55 @@
     </div>
     <?php
     //todo graph
+    if (!empty($snapshot)) {
+        ?>
+        <p class="card-panel-title">
+            [[You have only one snapshot occurred, so it is shown instead of aggregation:]]
+        </p>
+        <iframe src="<?= vault()->uri('snapshots:iframe', ['id' => $snapshot->id]) ?>" width="100%"
+                height="100%" frameborder="0" scrolling="no"
+                onload="javascript:resizeIframe(this);"></iframe>
+        <?php
+    } else {
+        ?>
+        <vault:grid source="<?= $source ?>" as="entity" color="teal">
+            <grid:cell label="[[ID:]]" value="<?= $entity->id ?>"/>
+
+            <grid:cell label="[[Occurred:]]">
+                <?= $entity->when() ?>
+                <span class="grey-text">(<?= $entity->when(true) ?>)</span>
+            </grid:cell>
+
+            <grid:cell label="[[Status:]]" value="<?= e($entity->status) ?>"/>
+            <grid:cell label="[[Class:]]" value="<?= e($entity->exception_classname) ?>"/>
+            <grid:cell label="[[Filename:]]" value="<?= e(basename($entity->filename)) ?>"/>
+
+            <grid:cell style="text-align:right">
+                <?php
+                if ($entity->stored()) {
+                    ?>
+                    <vault:uri target="snapshots:snapshot" icon="edit" class="btn-flat waves-effect"
+                               options="<?= ['id' => $entity->id] ?>"/>
+                    <?php
+                }
+                ?>
+            </grid:cell>
+
+            <grid:cell style="text-align:right">
+                <?php
+                if ($entity->stored()) {
+                    ?>
+                    <vault:uri target="snapshots:removeSnapshot" icon="delete"
+                               class="btn red waves-effect waves-light"
+                               options="<?= ['id' => $entity->id] ?>">
+                        [[Remove]]
+                    </vault:uri>
+                    <?php
+                }
+                ?>
+            </grid:cell>
+        </vault:grid>
+        <?php
+    }
     ?>
-    <vault:grid source="<?= $source ?>" as="entity" color="teal">
-        <grid:cell label="[[ID:]]" value="<?= $entity->id ?>"/>
-
-        <grid:cell label="[[Occurred:]]">
-            <?= $entity->when() ?>
-            <span class="grey-text">(<?= $entity->when(true) ?>)</span>
-        </grid:cell>
-
-        <grid:cell label="[[Status:]]" value="<?= e($entity->status) ?>"/>
-        <grid:cell label="[[Class:]]" value="<?= e($entity->exception_classname) ?>"/>
-        <grid:cell label="[[Filename:]]" value="<?= e(basename($entity->filename)) ?>"/>
-
-        <grid:cell style="text-align:right">
-            <?php
-            if ($entity->stored()) {
-                ?>
-                <vault:uri target="snapshots:snapshot" icon="edit" class="btn-flat waves-effect"
-                           options="<?= ['id' => $entity->id] ?>"/>
-                <?php
-            }
-            ?>
-        </grid:cell>
-
-        <grid:cell style="text-align:right">
-            <?php
-            if ($entity->stored()) {
-                ?>
-                <vault:uri target="snapshots:removeSnapshot" icon="delete"
-                           class="btn red waves-effect waves-light"
-                           options="<?= ['id' => $entity->id] ?>">
-                    [[Remove]]
-                </vault:uri>
-                <?php
-            }
-            ?>
-        </grid:cell>
-    </vault:grid>
 </define:content>
