@@ -1,7 +1,8 @@
 # snapshotter
 Snapshots management module. Snapshot files are now stored in database, this allows to view and easily manipulate them. 
 
-#After installation you only need to do next steps:
+After installation you only need to do next steps:
+
 1. add binding to `\Spiral\Snapshotter\Debug\AggregatedSnapshot::class`
 ```php
 $this->container->bind(
