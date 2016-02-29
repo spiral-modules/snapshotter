@@ -10,7 +10,6 @@ $this->container->bind(
     \Spiral\Snapshotter\Debug\AggregatedSnapshot::class
 );
 ```
-
 2. To include snapshots link into navigation menu be sure that you have `navigation.vault` placeholder in `modules/vault` config like this:
 ```php
 'vault'    => [
@@ -21,7 +20,6 @@ $this->container->bind(
     ]
 ]
 ```
-
 3. Do not forget to define `vault` database connection.
 Snapshotter is an addition to the vault module, so it uses database `vault`
 
