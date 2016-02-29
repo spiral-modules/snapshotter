@@ -44,12 +44,17 @@
             ?>
             <p class="grey-text"><?= $aggregation->whenLast() ?> (<?= $aggregation->whenLast(true) ?>)</p>
             <?php
+            if (!empty($snapshot)) {
+                ?>
+                <p>[[You have only one snapshot occurred.]]</p>
+                <?php
+            }
         }
         ?>
     </vault:card>
     <div class="row">
-        <div class="col s6 m6">
-            <vault:block title="[[Snapshot suppression:]]">
+        <div class="col s4 m4">
+            <vault:block title="[[Suppression:]]">
                 <?php
                 $formAction = vault()->uri('snapshots:suppress', [
                     'id' => $aggregation->id
@@ -68,8 +73,8 @@
                 </spiral:form>
             </vault:block>
         </div>
-        <div class="col s2 m2">
-            <vault:block title="[[Snapshots counters:]]">
+        <div class="col s4 m4">
+            <vault:block title="[[Counters:]]">
                 <dl>
                     <dt>[[Occurred:]]</dt>
                     <dd><?= $aggregation->count_occurred ?></dd>
@@ -83,7 +88,7 @@
             </vault:block>
         </div>
         <div class="col s4 m4">
-            <vault:block title="[[Snapshot occurrance time:]]">
+            <vault:block title="[[Occurred time:]]">
                 <dl>
                     <?php
                     if ($aggregation->count_occurred->serializeData() > 1) {
@@ -109,9 +114,7 @@
     //todo graph
     if (!empty($snapshot)) {
         ?>
-        <p class="card-panel-title">
-            [[You have only one snapshot occurred, so it is shown instead of aggregation:]]
-        </p>
+        <p class="card-panel-title">[[You have only one snapshot occurred.]]</p>
         <iframe src="<?= vault()->uri('snapshots:iframe', ['id' => $snapshot->id]) ?>" width="100%"
                 height="100%" frameborder="0" scrolling="no"
                 onload="javascript:resizeIframe(this);"></iframe>
