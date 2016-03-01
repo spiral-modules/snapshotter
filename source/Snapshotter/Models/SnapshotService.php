@@ -32,13 +32,13 @@ class SnapshotService extends Service
     }
 
     /**
-     * @param \Exception $exception
+     * @param \Throwable $exception
      * @param string     $filename
      * @param string     $teaser
      * @param string     $hash
      * @return Snapshot
      */
-    public function createFromException(\Exception $exception, $filename, $teaser, $hash)
+    public function createFromException(\Throwable $exception, $filename, $teaser, $hash)
     {
         $fields = [
             'exception_hash'      => $hash,
