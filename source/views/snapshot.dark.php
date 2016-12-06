@@ -14,17 +14,13 @@
 </define:resources>
 
 <define:actions>
-    <?php
-    if ($snapshot->stored()) {
-        ?>
+    <?php if ($snapshot->stored()) { ?>
         <vault:uri target="snapshots:removeSnapshot" icon="delete"
                    class="btn red waves-effect waves-light"
                    options="<?= ['id' => $snapshot->id] ?>">
             [[Remove]]
         </vault:uri>
-        <?php
-    }
-    ?>
+    <?php } ?>
 
     <vault:uri target="snapshots:edit" class="btn-flat teal-text waves-effect"
                post-icon="trending_flat" options="<?= ['id' => $snapshot->aggregation_id] ?>">
@@ -38,8 +34,7 @@
         <p><?= $snapshot->exception_classname ?></p>
         <p><?= $snapshot->filesize(true) ?></p>
     </vault:card>
-    <?php
-    switch ($snapshot->status) {
+    <?php switch ($snapshot->status) {
         case 'suppressed':
             ?>
             <h4>[[Can't render snapshot - it was suppressed.]]</h4>
@@ -55,7 +50,5 @@
             <iframe src="<?= vault()->uri('snapshots:iframe', ['id' => $snapshot->id]) ?>"
                     width="100%" height="100%" frameborder="0" scrolling="no"
                     onload="javascript:resizeIframe(this);"></iframe>
-            <?php
-    }
-    ?>
+        <?php } ?>
 </define:content>

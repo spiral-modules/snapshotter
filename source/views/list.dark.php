@@ -7,9 +7,7 @@
 ?>
 
 <define:actions>
-    <?php
-    if (!empty($lastSnapshot)) {
-        ?>
+    <?php if (!empty($lastSnapshot)) { ?>
         <vault:uri target="snapshots:removeAll" icon="delete"
                    class="btn red waves-effect waves-light">
             [[Remove all]]
@@ -19,25 +17,17 @@
                    options="<?= ['id' => $lastSnapshot->id] ?>">
             [[View last]]
         </vault:uri>
-        <?php
-    }
-    ?>
+    <?php } ?>
 </define:actions>
 
 <define:content>
     <vault:card title="[[Last Snapshot:]]">
-        <?php
-        if (empty($lastSnapshot)) {
-            ?>
+        <?php if (empty($lastSnapshot)) { ?>
             <p class="grey-text">[[No snapshots occurred.]]</p>
-            <?php
-        } else {
-            ?>
+        <?php } else { ?>
             <p class="grey-text"><?= $lastSnapshot->whenLast() ?> (<?= $lastSnapshot->whenLast(true) ?>)</p>
             <p><?= $lastSnapshot->exception_teaser ?></p>
-            <?php
-        }
-        ?>
+        <?php } ?>
     </vault:card>
     <?php
     //todo graph
@@ -59,11 +49,9 @@
             <b>
                 <?= $entity->isSuppressionEnabled() ? '[[YES]]' : '[[NO]]' ?>
             </b>
-            <?php
-            if ($entity->isSuppressionEnabled()) {
+            <?php if ($entity->isSuppressionEnabled()) {
                 echo '(' . $entity->count_suppressed . ')';
-            }
-            ?>
+            } ?>
         </grid:cell>
 
         <grid:cell style="text-align:right">

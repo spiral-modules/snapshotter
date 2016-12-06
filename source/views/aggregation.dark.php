@@ -16,17 +16,13 @@
 </define:resources>
 
 <define:actions>
-    <?php
-    if (!empty($aggregation->count_stored)) {
-        ?>
+    <?php if (!empty($aggregation->count_stored)) { ?>
         <vault:uri target="snapshots:removeSnapshots" icon="delete"
                    class="btn red waves-effect waves-light"
                    options="<?= ['id' => $aggregation->id] ?>">
             [[Remove all]]
         </vault:uri>
-        <?php
-    }
-    ?>
+    <?php } ?>
     <vault:uri target="snapshots" class="btn-flat teal-text waves-effect" post-icon="trending_flat">
         [[BACK]]
     </vault:uri>
@@ -35,31 +31,21 @@
 <define:content>
     <vault:card title="[[Last Snapshot:]]">
         <p><?= $aggregation->exception_teaser ?></p>
-        <?php
-        if (empty($aggregation->count_stored)) {
-            ?>
+        <?php if (empty($aggregation->count_stored)) { ?>
             <p class="grey-text">[[No snapshots stored.]]</p>
-            <?php
-        } else {
-            ?>
+        <?php } else { ?>
             <p class="grey-text"><?= $aggregation->whenLast() ?> (<?= $aggregation->whenLast(true) ?>)</p>
-            <?php
-            if (!empty($snapshot)) {
-                ?>
+            <?php if (!empty($snapshot)) { ?>
                 <p>[[You have only one snapshot occurred.]]</p>
-                <?php
-            }
-        }
-        ?>
+            <?php }
+        } ?>
     </vault:card>
     <div class="row">
         <div class="col s4 m4">
             <vault:block title="[[Suppression:]]">
-                <?php
-                $formAction = vault()->uri('snapshots:suppress', [
+                <?php $formAction = vault()->uri('snapshots:suppress', [
                     'id' => $aggregation->id
-                ]);
-                ?>
+                ]); ?>
                 <spiral:form action="<?= $formAction ?>">
                     <p>
                         <input type="checkbox" name="suppression" value="1" id="suppression"
@@ -90,17 +76,13 @@
         <div class="col s4 m4">
             <vault:block title="[[Occurred time:]]">
                 <dl>
-                    <?php
-                    if ($aggregation->count_occurred->serializeData() > 1) {
-                        ?>
+                    <?php if ($aggregation->count_occurred->serializeData() > 1) { ?>
                         <dt>[[First:]]</dt>
                         <dd>
                             <?= $aggregation->whenFirst() ?>
                             <span class="grey-text">(<?= $aggregation->whenFirst(true) ?>)</span>
                         </dd>
-                        <?php
-                    }
-                    ?>
+                    <?php } ?>
                     <dt>[[Last:]]</dt>
                     <dd>
                         <?= $aggregation->whenLast() ?>
@@ -112,15 +94,13 @@
     </div>
     <?php
     //todo graph
-    if (!empty($snapshot)) {
-        ?>
+    ?>
+    <?php if (!empty($snapshot)) { ?>
         <p class="card-panel-title">[[You have only one snapshot occurred.]]</p>
         <iframe src="<?= vault()->uri('snapshots:iframe', ['id' => $snapshot->id]) ?>" width="100%"
                 height="100%" frameborder="0" scrolling="no"
                 onload="javascript:resizeIframe(this);"></iframe>
-        <?php
-    } else {
-        ?>
+    <?php } else { ?>
         <vault:grid source="<?= $source ?>" as="entity" color="teal">
             <grid:cell label="[[ID:]]" value="<?= $entity->id ?>"/>
 
@@ -134,31 +114,21 @@
             <grid:cell label="[[Filename:]]" value="<?= e(basename($entity->filename)) ?>"/>
 
             <grid:cell style="text-align:right">
-                <?php
-                if ($entity->stored()) {
-                    ?>
+                <?php if ($entity->stored()) { ?>
                     <vault:uri target="snapshots:snapshot" icon="edit" class="btn-flat waves-effect"
                                options="<?= ['id' => $entity->id] ?>"/>
-                    <?php
-                }
-                ?>
+                <?php } ?>
             </grid:cell>
 
             <grid:cell style="text-align:right">
-                <?php
-                if ($entity->stored()) {
-                    ?>
+                <?php if ($entity->stored()) { ?>
                     <vault:uri target="snapshots:removeSnapshot" icon="delete"
                                class="btn red waves-effect waves-light"
                                options="<?= ['id' => $entity->id] ?>">
                         [[Remove]]
                     </vault:uri>
-                    <?php
-                }
-                ?>
+                <?php } ?>
             </grid:cell>
         </vault:grid>
-        <?php
-    }
-    ?>
+    <?php } ?>
 </define:content>

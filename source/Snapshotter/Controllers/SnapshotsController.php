@@ -4,6 +4,8 @@ namespace Spiral\Snapshotter\Controllers;
 use Spiral\Core\Controller;
 use Spiral\Http\Exceptions\ClientExceptions\ForbiddenException;
 use Spiral\Http\Exceptions\ClientExceptions\NotFoundException;
+use Spiral\Http\Input\InputManager;
+use Spiral\Http\Responses\Responder;
 use Spiral\Security\Traits\AuthorizesTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Snapshotter\Database\Aggregation;
@@ -12,12 +14,19 @@ use Spiral\Snapshotter\Database\Sources\AggregationSource;
 use Spiral\Snapshotter\Database\Sources\SnapshotSource;
 use Spiral\Snapshotter\Models\AggregationService;
 use Spiral\Snapshotter\Models\Statistics;
+use Spiral\Vault\Vault;
+use Spiral\Views\ViewManager;
 
 /**
  * Created by PhpStorm.
  * User: Valentin
  * Date: 09.02.2016
  * Time: 17:47
+ *
+ * @property InputManager $input
+ * @property ViewManager  $views
+ * @property Vault        $vault
+ * @property Responder    $responses
  */
 class SnapshotsController extends Controller
 {
@@ -32,6 +41,7 @@ class SnapshotsController extends Controller
      */
     public function indexAction(AggregationSource $source, Statistics $statistics)
     {
+        //todo listing
         //todo filter by active (has snapshots), all - NOW filter is hardcoded
         //todo graph
         return $this->views->render('snapshotter:list', [
@@ -53,7 +63,6 @@ class SnapshotsController extends Controller
         SnapshotSource $snapshotSource
     ) {
         //todo graph
-        //todo show snapshot at once, if there is one only
         /**
          * @var Aggregation $aggregation
          */
@@ -169,13 +178,16 @@ class SnapshotsController extends Controller
             }
         }
 
-        return [
-            'status'  => 200,
-            'message' => $this->say('Snapshot deleted.'),
-            'action'  => [
-                'redirect' => $this->vault->uri('snapshots')
-            ]
-        ];
+        $uri = $this->vault->uri('snapshots');
+        if ($this->input->isAjax()) {
+            return [
+                'status'  => 200,
+                'message' => $this->say('Snapshot deleted.'),
+                'action'  => ['redirect' => $uri]
+            ];
+        } else {
+            return $this->responses->redirect($uri);
+        }
     }
 
     /**
@@ -212,13 +224,17 @@ class SnapshotsController extends Controller
             $aggregationService->getSource()->save($aggregation);
         }
 
-        return [
-            'status'  => 200,
-            'message' => $this->say('Snapshot deleted.'),
-            'action'  => [
-                'redirect' => $this->vault->uri('snapshots:edit', ['id' => $aggregation->id])
-            ]
-        ];
+        //todo pass paginator args to remove
+        $uri = $this->vault->uri('snapshots');
+        if ($this->input->isAjax()) {
+            return [
+                'status'  => 200,
+                'message' => $this->say('Snapshots deleted.'),
+                'action'  => ['redirect' => $uri]
+            ];
+        } else {
+            return $this->responses->redirect($uri);
+        }
     }
 
     /**
@@ -257,12 +273,15 @@ class SnapshotsController extends Controller
 
         $snapshotSource->delete($snapshot);
 
-        return [
-            'status'  => 200,
-            'message' => $this->say('Snapshot deleted.'),
-            'action'  => [
-                'redirect' => $this->vault->uri('snapshots:edit', ['id' => $aggregation->id])
-            ]
-        ];
+        $uri = $this->vault->uri('snapshots:edit', ['id' => $aggregation->id]);
+        if ($this->input->isAjax()) {
+            return [
+                'status'  => 200,
+                'message' => $this->say('Snapshot deleted.'),
+                'action'  => ['redirect' => $uri]
+            ];
+        } else {
+            return $this->responses->redirect($uri);
+        }
     }
 }

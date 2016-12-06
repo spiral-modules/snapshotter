@@ -63,7 +63,7 @@ class AggregatedSnapshot extends Snapshot
         SnapshotService $snapshotService,
         AggregationService $aggregationService
     ) {
-        //todo getConfig(), getLogger()
+        //todo getConfig() into Snapshot, getLogger() into QuickSnapshot
         $this->config = $this->saturate($config, SnapshotConfig::class);
         $this->logger = $this->saturate($logger, LoggerInterface::class);
         $this->snapshotService = $this->saturate($snapshotService, SnapshotService::class);
