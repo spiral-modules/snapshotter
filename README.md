@@ -1,9 +1,19 @@
 # snapshotter
 Snapshots management module. Snapshot files are now stored in database, this allows to view and easily manipulate them. 
 
+[![Latest Stable Version](https://poser.pugx.org/spiral/snapshotter/v/stable)](https://packagist.org/packages/spiral/snapshotter) 
+[![Total Downloads](https://poser.pugx.org/spiral/snapshotter/downloads)](https://packagist.org/packages/spiral/snapshotter) 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiral-modules/snapshotter/badges/quality-score.png)](https://scrutinizer-ci.com/g/spiral-modules/snapshotter/) 
+
+## Installation
+```
+composer require spiral/snapshotter
+spiral register spiral/snapshotter
+```
+
 After installation you only need to do next steps:
 
-1. add binding to `\Spiral\Snapshotter\Debug\AggregatedSnapshot::class`
+### add binding to `\Spiral\Snapshotter\Debug\AggregatedSnapshot::class`
 ```php
 $this->container->bind(
     Debug\SnapshotInterface::class,
@@ -11,7 +21,7 @@ $this->container->bind(
 );
 ```
 
-2. To include snapshots link into navigation menu be sure that you have `navigation.vault` placeholder in `modules/vault` config like this
+### To include snapshots link into navigation menu be sure that you have `navigation.vault` placeholder in `modules/vault` config like this
 ```php
 'vault'    => [
     'title' => 'Vault',
@@ -22,9 +32,10 @@ $this->container->bind(
 ]
 ```
 
-3. Do not forget to define `vault` database connection.
+### Do not forget to define `vault` database connection.
 Snapshotter is an addition to the vault module, so it uses database `vault`
 
 #todo-list
-1. Add charts
+1. Add charts/widgets
 2. Add listing dependency
+3. Tests
