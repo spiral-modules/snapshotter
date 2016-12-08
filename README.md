@@ -13,7 +13,8 @@ spiral register spiral/snapshotter
 
 After installation you only need to do next steps:
 
-### add binding to `\Spiral\Snapshotter\Debug\AggregatedSnapshot::class`
+### Add binding to aggregator class
+
 ```php
 $this->container->bind(
     Debug\SnapshotInterface::class,
@@ -21,7 +22,9 @@ $this->container->bind(
 );
 ```
 
-### To include snapshots link into navigation menu be sure that you have `navigation.vault` placeholder in `modules/vault` config like this
+### Include snapshots link into navigation menu (optional)
+
+Be sure that you have `navigation.vault` placeholder in `modules/vault` config like this
 ```php
 'vault'    => [
     'title' => 'Vault',
@@ -32,7 +35,7 @@ $this->container->bind(
 ]
 ```
 
-### Do not forget to define `vault` database connection.
+### Define database connection.
 Snapshotter is an addition to the vault module, so it uses database `vault`
 
 #todo-list
