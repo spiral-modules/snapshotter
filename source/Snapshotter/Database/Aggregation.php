@@ -17,11 +17,15 @@ use Spiral\ORM\Record;
 /**
  * Class Aggregation
  *
+ * @property int          $id
+ * @property SqlTimestamp $last_occurred_time
+ * @property bool         $suppression
+ * @property string       $exception_hash
+ * @property string       $exception_teaser
  * @property AtomicNumber $count_occurred
  * @property AtomicNumber $count_stored
  * @property AtomicNumber $count_suppressed
  * @property AtomicNumber $count_deleted
- * @property              $last_occurred_time
  * @package Spiral\Snapshotter\Database
  */
 class Aggregation extends Record

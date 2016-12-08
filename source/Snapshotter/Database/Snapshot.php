@@ -14,8 +14,18 @@ use Spiral\ORM\Record;
 use Spiral\Support\Strings;
 
 /**
- * Class Snapshot
+ * Class Aggregation
  *
+ * @property int    $id
+ * @property string $filename
+ * @property string $status
+ * @property string $exception_hash
+ * @property string $exception_teaser
+ * @property string $exception_classname
+ * @property string $exception_message
+ * @property string $exception_line
+ * @property string $exception_file
+ * @property string $exception_code
  * @package Spiral\Snapshotter\Database
  */
 class Snapshot extends Record
