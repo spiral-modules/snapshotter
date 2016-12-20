@@ -50,7 +50,7 @@ class SnapshotterModule implements ModuleInterface
         $registrator->configure('modules/vault', 'navigation.vault', 'spiral/snapshotter', [
             "'snapshots' => [",
             "    'title'    => 'Snapshots',",
-            "    'requires' => 'keeper.vault.snapshots'",
+            "    'requires' => 'vault.snapshots'",
             "]",
             "/*{{navigation.vault.snapshots}}*/",
         ]);
