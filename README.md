@@ -38,6 +38,58 @@ Be sure that you have `navigation.vault` placeholder in `modules/vault` config l
 ### Define database connection.
 Snapshotter is an addition to the vault module, so it uses database `vault`
 
+---
+
+### Using PHP version < 7? 
+
+Create your own inherited class for `SnapshotService` with `createFromException` method overriding and replace `$exception` type with `\Exception` instead of `\Throwable`
+
+```php
+class LegacySnapshotService extends SnapshotService
+{
+    /**
+     * @param \Exception $exception
+     * @param string     $filename
+     * @param string     $teaser
+     * @param string     $hash
+     * @return Snapshot
+     */
+    public function createFromException(\Exception $exception, $filename, $teaser, $hash)
+    {
+        $fields = [
+            'exception_hash'      => $hash,
+            'filename'            => $filename,
+            'exception_teaser'    => $teaser,
+            'exception_classname' => get_class($exception),
+            'exception_message'   => $exception->getMessage(),
+            'exception_line'      => $exception->getLine(),
+            'exception_file'      => $exception->getFile(),
+            'exception_code'      => $exception->getCode(),
+        ];
+
+        return $this->getSource()->create($fields);
+    }
+}
+```
+ 
+After that bind your new class before binding `Debug\SnapshotInterface::class`
+
+```php
+if (version_compare(PHP_VERSION, '7.0') < 0) {
+    $this->container->bind(
+        \Spiral\Snapshotter\Models\SnapshotService::class,
+        \LegacySnapshotService::class
+    );
+}
+
+$this->container->bind(
+    Debug\SnapshotInterface::class,
+    \Spiral\Snapshotter\Debug\AggregatedSnapshot::class
+);
+```
+
+---
+
 #todo-list
 1. Add charts/widgets
 2. Add listing dependency
