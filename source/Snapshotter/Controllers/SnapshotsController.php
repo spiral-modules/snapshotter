@@ -32,7 +32,7 @@ class SnapshotsController extends Controller
 {
     use AuthorizesTrait, TranslatorTrait;
 
-    const GUARD_NAMESPACE = 'keeper.vault.snapshots';
+    const GUARD_NAMESPACE = 'vault.snapshots';
 
     /**
      * @param AggregationSource $source
