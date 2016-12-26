@@ -16,7 +16,7 @@ After installation you only need to do next steps:
 ### Binding SnaphotInterface to AggregatedSnapshot
 
 ```php
-$this->container->bind(Debug\SnapshotInterface::class, \Spiral\Snapshotter\Debug\AggregatedSnapshot::class);
+$this->container->bind(SnapshotInterface::class, Snapshotter\Debug\AggregatedSnapshot::class);
 ```
 
 ### Include snapshots link into navigation menu (optional)
@@ -73,21 +73,15 @@ After that bind your new class before binding `Debug\SnapshotInterface::class`
 
 ```php
 if (version_compare(PHP_VERSION, '7.0') < 0) {
-    $this->container->bind(
-        \Spiral\Snapshotter\Models\SnapshotService::class,
-        \LegacySnapshotService::class
-    );
+    $this->container->bind(Snapshotter\Models\SnapshotService::class, \LegacySnapshotService::class);
+} else {
+    $this->container->bind(Debug\SnapshotInterface::class, Snapshotter\Debug\AggregatedSnapshot::class);
 }
-
-$this->container->bind(
-    Debug\SnapshotInterface::class,
-    \Spiral\Snapshotter\Debug\AggregatedSnapshot::class
-);
 ```
 
 ---
 
-#todo-list
+#TODO-list
 1. Add charts/widgets
 2. Add listing dependency
 3. Tests
