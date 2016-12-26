@@ -1,4 +1,4 @@
-# snapshotter
+# Snapshotter
 Snapshots management module. Snapshot files are now stored in database, this allows to view and easily manipulate them. 
 
 [![Latest Stable Version](https://poser.pugx.org/spiral/snapshotter/v/stable)](https://packagist.org/packages/spiral/snapshotter) 
@@ -13,13 +13,10 @@ spiral register spiral/snapshotter
 
 After installation you only need to do next steps:
 
-### Add binding to aggregator class
+### Binding SnaphotInterface to AggregatedSnapshot
 
 ```php
-$this->container->bind(
-    Debug\SnapshotInterface::class,
-    \Spiral\Snapshotter\Debug\AggregatedSnapshot::class
-);
+$this->container->bind(Debug\SnapshotInterface::class, \Spiral\Snapshotter\Debug\AggregatedSnapshot::class);
 ```
 
 ### Include snapshots link into navigation menu (optional)
