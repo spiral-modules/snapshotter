@@ -43,7 +43,7 @@ class Aggregation extends Record
     protected $schema = [
         //primary fields
         'id'                 => 'primary',
-        'last_occurred_time' => 'timestamp',
+        'last_occurred_time' => 'datetime',
         'suppression'        => 'bool',
 
         //exception teaser
