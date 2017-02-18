@@ -1,32 +1,30 @@
 <?php
-namespace Spiral\Snapshotter\Controllers;
 
+namespace Spiral\Snapshotter\AggregationHandler\Controllers;
+
+use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\Controller;
+use Spiral\Core\Traits\AuthorizesTrait;
+use Spiral\Database\Builders\SelectQuery;
 use Spiral\Http\Exceptions\ClientExceptions\ForbiddenException;
 use Spiral\Http\Exceptions\ClientExceptions\NotFoundException;
-use Spiral\Http\Input\InputManager;
-use Spiral\Http\Responses\Responder;
-use Spiral\Security\Traits\AuthorizesTrait;
+use Spiral\Http\Request\InputManager;
+use Spiral\Http\Response\ResponseWrapper;
+use Spiral\Snapshotter\AggregationHandler\Database\Sources\SnapshotSource;
 use Spiral\Translator\Traits\TranslatorTrait;
-use Spiral\Snapshotter\Database\Aggregation;
-use Spiral\Snapshotter\Database\Snapshot;
+use Spiral\Snapshotter\Database\SnapshotAggregation;
+use Spiral\Snapshotter\Database\AggregatedSnapshot;
 use Spiral\Snapshotter\Database\Sources\AggregationSource;
-use Spiral\Snapshotter\Database\Sources\SnapshotSource;
 use Spiral\Snapshotter\Models\AggregationService;
-use Spiral\Snapshotter\Models\Statistics;
+
 use Spiral\Vault\Vault;
 use Spiral\Views\ViewManager;
 
 /**
- * Created by PhpStorm.
- * User: Valentin
- * Date: 09.02.2016
- * Time: 17:47
- *
- * @property InputManager $input
- * @property ViewManager  $views
- * @property Vault        $vault
- * @property Responder    $responses
+ * @property InputManager    $input
+ * @property ViewManager     $views
+ * @property Vault           $vault
+ * @property ResponseWrapper $response
  */
 class SnapshotsController extends Controller
 {
@@ -35,19 +33,16 @@ class SnapshotsController extends Controller
     const GUARD_NAMESPACE = 'vault.snapshots';
 
     /**
-     * @param AggregationSource $source
-     * @param Statistics        $statistics
+     * @param SnapshotSource $source
      * @return mixed
      */
-    public function indexAction(AggregationSource $source, Statistics $statistics)
+    public function indexAction(SnapshotSource $source)
     {
-        //todo listing
-        //todo filter by active (has snapshots), all - NOW filter is hardcoded
-        //todo graph
+        $this->authorize('list');
+
         return $this->views->render('snapshotter:list', [
-            'source'       => $source->findWithSnapshots()->orderBy('last_occurred_time', 'DESC'),
-            'lastSnapshot' => $source->findLast(),
-            'statistics'   => $statistics
+            'source' => $source->findWithSnapshots()
+                ->orderBy('last_snapshot.time_created', SelectQuery::SORT_DESC)
         ]);
     }
 
@@ -62,10 +57,7 @@ class SnapshotsController extends Controller
         AggregationService $aggregationService,
         SnapshotSource $snapshotSource
     ) {
-        //todo graph
-        /**
-         * @var Aggregation $aggregation
-         */
+        /** @var SnapshotAggregation $aggregation */
         $aggregation = $aggregationService->getSource()->findByPK($id);
         if (empty($aggregation)) {
             throw new NotFoundException;
@@ -93,9 +85,7 @@ class SnapshotsController extends Controller
      */
     public function suppressAction($id, AggregationSource $source)
     {
-        /**
-         * @var Aggregation $aggregation
-         */
+        /** @var SnapshotAggregation $aggregation */
         $aggregation = $source->findByPK($id);
         if (empty($aggregation)) {
             throw new NotFoundException;
@@ -104,7 +94,7 @@ class SnapshotsController extends Controller
         $this->authorize('edit', compact('aggregation'));
 
         $aggregation->setSuppression($this->input->data('suppression', false));
-        $source->save($aggregation);
+        $aggregation->save();
 
         return [
             'status'  => 200,
@@ -136,6 +126,7 @@ class SnapshotsController extends Controller
      */
     public function iframeAction($id, SnapshotSource $source)
     {
+        /** @var AggregatedSnapshot $snapshot */
         $snapshot = $source->findByPK($id);
         if (empty($snapshot)) {
             throw new NotFoundException;
@@ -163,6 +154,7 @@ class SnapshotsController extends Controller
     ) {
         $this->authorize('remove');
 
+        /** @var SnapshotAggregation $aggregation */
         foreach ($aggregationSource->find() as $aggregation) {
             $countDeleted = 0;
             if (!empty($snapshotSource->findStored($aggregation)->count())) {
@@ -174,11 +166,12 @@ class SnapshotsController extends Controller
 
             if (!empty($countDeleted)) {
                 $aggregationService->deleteSnapshots($aggregation, $countDeleted);
-                $aggregationSource->save($aggregation);
+                $aggregation->save();
             }
         }
 
         $uri = $this->vault->uri('snapshots');
+
         if ($this->input->isAjax()) {
             return [
                 'status'  => 200,
@@ -186,23 +179,25 @@ class SnapshotsController extends Controller
                 'action'  => ['redirect' => $uri]
             ];
         } else {
-            return $this->responses->redirect($uri);
+            return $this->response->redirect($uri);
         }
     }
 
     /**
-     * @param string             $id
-     * @param AggregationService $aggregationService
-     * @param SnapshotSource     $snapshotSource
+     * @param string                 $id
+     * @param AggregationService     $aggregationService
+     * @param SnapshotSource         $snapshotSource
+     * @param ServerRequestInterface $request
      * @return array
      */
     public function removeSnapshotsAction(
         $id,
         AggregationService $aggregationService,
-        SnapshotSource $snapshotSource
+        SnapshotSource $snapshotSource,
+        ServerRequestInterface $request
     ) {
         /**
-         * @var Aggregation $aggregation
+         * @var SnapshotAggregation $aggregation
          */
         $aggregation = $aggregationService->getSource()->findByPK($id);
         if (empty($aggregation)) {
@@ -221,19 +216,19 @@ class SnapshotsController extends Controller
 
         if (!empty($countDeleted)) {
             $aggregationService->deleteSnapshots($aggregation, $countDeleted);
-            $aggregationService->getSource()->save($aggregation);
+            $aggregation->save();
         }
 
-        //todo pass paginator args to remove
-        $uri = $this->vault->uri('snapshots');
+        $uri = $request->getServerParams()['HTTP_REFERER'];
+
         if ($this->input->isAjax()) {
             return [
                 'status'  => 200,
-                'message' => $this->say('Snapshots deleted.'),
+                'message' => $this->say('Snapshots aggregation deleted.'),
                 'action'  => ['redirect' => $uri]
             ];
         } else {
-            return $this->responses->redirect($uri);
+            return $this->response->redirect($uri);
         }
     }
 
@@ -249,15 +244,15 @@ class SnapshotsController extends Controller
         AggregationService $aggregationService
     ) {
         /**
-         * @var Snapshot    $snapshot
-         * @var Aggregation $aggregation
+         * @var AggregatedSnapshot  $snapshot
+         * @var SnapshotAggregation $aggregation
          */
         $snapshot = $snapshotSource->findByPK($id);
         if (empty($snapshot)) {
             throw new NotFoundException;
         }
 
-        if (!$snapshot->stored()) {
+        if (!$snapshot->isStored()) {
             throw new ForbiddenException;
         }
 
@@ -269,11 +264,12 @@ class SnapshotsController extends Controller
         $this->authorize('remove', compact('aggregation', 'snapshot'));
 
         $aggregationService->deleteSnapshots($aggregation, 1);
-        $aggregationService->getSource()->save($aggregation);
+        $aggregation->save();
 
         $snapshotSource->delete($snapshot);
 
         $uri = $this->vault->uri('snapshots:edit', ['id' => $aggregation->id]);
+
         if ($this->input->isAjax()) {
             return [
                 'status'  => 200,
@@ -281,7 +277,7 @@ class SnapshotsController extends Controller
                 'action'  => ['redirect' => $uri]
             ];
         } else {
-            return $this->responses->redirect($uri);
+            return $this->response->redirect($uri);
         }
     }
 }

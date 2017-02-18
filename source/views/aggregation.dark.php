@@ -1,11 +1,13 @@
-<extends:vault:layout title="[[Vault : Snapshots]]" class="wide-content"/>
-<?php #compile
+<?php
 /**
- * @var \Spiral\Snapshotter\Database\Aggregation $aggregation
- * @var \Spiral\Snapshotter\Database\Snapshot    $entity
- * @var \Spiral\Snapshotter\Database\Snapshot    $snapshot
+ * @var \Spiral\Snapshotter\Database\SnapshotAggregation $aggregation
+ * @var \Spiral\Snapshotter\Database\AggregatedSnapshot  $entity
+ * @var \Spiral\Snapshotter\Database\AggregatedSnapshot  $snapshot
+ * @var \Spiral\Snapshotter\Models\Timestamps            $timestamps
  */
 ?>
+<extends:vault:layout title="[[Vault : Snapshots]]" class="wide-content"/>
+
 <define:resources>
     <block:resources/>
     <script language="javascript" type="text/javascript">
@@ -19,7 +21,7 @@
     <?php if (!empty($aggregation->count_stored)) { ?>
         <vault:uri target="snapshots:removeSnapshots" icon="delete"
                    class="btn red waves-effect waves-light"
-                   options="<?= ['id' => $aggregation->id] ?>">
+                   options="<?= ['id' => $aggregation->primaryKey()] ?>">
             [[Remove all]]
         </vault:uri>
     <?php } ?>
@@ -29,12 +31,16 @@
 </define:actions>
 
 <define:content>
+    <?php
+    $timestamps = spiral(\Spiral\Snapshotter\Models\Timestamps::class);
+    ?>
     <vault:card title="[[Last Snapshot:]]">
         <p><?= $aggregation->exception_teaser ?></p>
         <?php if (empty($aggregation->count_stored)) { ?>
             <p class="grey-text">[[No snapshots stored.]]</p>
         <?php } else { ?>
-            <p class="grey-text"><?= $aggregation->whenLast() ?> (<?= $aggregation->whenLast(true) ?>)</p>
+            <p class="grey-text"><?= $timestamps->lastOccurred($aggregation) ?>
+                (<?= $timestamps->lastOccurred($aggregation, true) ?>)</p>
             <?php if (!empty($snapshot)) { ?>
                 <p>[[You have only one snapshot occurred.]]</p>
             <?php }
@@ -44,7 +50,7 @@
         <div class="col s4 m4">
             <vault:block title="[[Suppression:]]">
                 <?php $formAction = vault()->uri('snapshots:suppress', [
-                    'id' => $aggregation->id
+                    'id' => $aggregation->primaryKey()
                 ]); ?>
                 <spiral:form action="<?= $formAction ?>">
                     <p>
@@ -76,37 +82,37 @@
         <div class="col s4 m4">
             <vault:block title="[[Occurred time:]]">
                 <dl>
-                    <?php if ($aggregation->count_occurred->serializeData() > 1) { ?>
+                    <?php if ($aggregation->count_occurred > 1) { ?>
                         <dt>[[First:]]</dt>
                         <dd>
-                            <?= $aggregation->whenFirst() ?>
-                            <span class="grey-text">(<?= $aggregation->whenFirst(true) ?>)</span>
+                            <?= $timestamps->firstOccurred($aggregation) ?>
+                            <span class="grey-text">(<?= $timestamps->firstOccurred($aggregation,
+                                    true) ?>)</span>
                         </dd>
                     <?php } ?>
                     <dt>[[Last:]]</dt>
                     <dd>
-                        <?= $aggregation->whenLast() ?>
-                        <span class="grey-text">(<?= $aggregation->whenLast(true) ?>)</span>
+                        <?= $timestamps->firstOccurred($aggregation) ?>
+                        <span class="grey-text">(<?= $timestamps->lastOccurred($aggregation,
+                                true) ?>)</span>
                     </dd>
                 </dl>
             </vault:block>
         </div>
     </div>
-    <?php
-    //todo graph
-    ?>
+
     <?php if (!empty($snapshot)) { ?>
         <p class="card-panel-title">[[You have only one snapshot occurred.]]</p>
-        <iframe src="<?= vault()->uri('snapshots:iframe', ['id' => $snapshot->id]) ?>" width="100%"
+        <iframe src="<?= vault()->uri('snapshots:iframe', ['id' => $snapshot->primaryKey()]) ?>" width="100%"
                 height="100%" frameborder="0" scrolling="no"
                 onload="javascript:resizeIframe(this);"></iframe>
     <?php } else { ?>
         <vault:grid source="<?= $source ?>" as="entity" color="teal">
-            <grid:cell label="[[ID:]]" value="<?= $entity->id ?>"/>
+            <grid:cell label="[[ID:]]" value="<?= $entity->primaryKey() ?>"/>
 
             <grid:cell label="[[Occurred:]]">
-                <?= $entity->when() ?>
-                <span class="grey-text">(<?= $entity->when(true) ?>)</span>
+                <?= $timestamps->timeOccurred($entity) ?>
+                <span class="grey-text">(<?= $timestamps->timeOccurred($entity, true) ?>)</span>
             </grid:cell>
 
             <grid:cell label="[[Status:]]" value="<?= e($entity->status) ?>"/>
@@ -114,17 +120,17 @@
             <grid:cell label="[[Filename:]]" value="<?= e(basename($entity->filename)) ?>"/>
 
             <grid:cell style="text-align:right">
-                <?php if ($entity->stored()) { ?>
+                <?php if ($entity->isStored()) { ?>
                     <vault:uri target="snapshots:snapshot" icon="edit" class="btn-flat waves-effect"
-                               options="<?= ['id' => $entity->id] ?>"/>
+                               options="<?= ['id' => $entity->primaryKey()] ?>"/>
                 <?php } ?>
             </grid:cell>
 
             <grid:cell style="text-align:right">
-                <?php if ($entity->stored()) { ?>
+                <?php if ($entity->isStored()) { ?>
                     <vault:uri target="snapshots:removeSnapshot" icon="delete"
                                class="btn red waves-effect waves-light"
-                               options="<?= ['id' => $entity->id] ?>">
+                               options="<?= ['id' => $entity->primaryKey()] ?>">
                         [[Remove]]
                     </vault:uri>
                 <?php } ?>

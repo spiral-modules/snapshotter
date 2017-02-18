@@ -1,7 +1,8 @@
 <extends:vault:layout title="[[Vault : Snapshot]]" class="wide-content"/>
 <?php
 /**
- * @var \Vault\Snapshotter\Database\Snapshot $snapshot
+ * @var \Spiral\Snapshotter\Database\AggregatedSnapshot $snapshot
+ * @var \Spiral\Snapshotter\Models\Timestamps           $timestamps
  */
 ?>
 <define:resources>
@@ -14,23 +15,28 @@
 </define:resources>
 
 <define:actions>
-    <?php if ($snapshot->stored()) { ?>
+    <?php if ($snapshot->isStored()) { ?>
         <vault:uri target="snapshots:removeSnapshot" icon="delete"
                    class="btn red waves-effect waves-light"
-                   options="<?= ['id' => $snapshot->id] ?>">
+                   options="<?= ['id' => $snapshot->primaryKey()] ?>">
             [[Remove]]
         </vault:uri>
     <?php } ?>
 
     <vault:uri target="snapshots:edit" class="btn-flat teal-text waves-effect"
-               post-icon="trending_flat" options="<?= ['id' => $snapshot->aggregation_id] ?>">
+               post-icon="trending_flat"
+               options="<?= ['id' => $snapshot->aggregation->primaryKey()] ?>">
         [[BACK]]
     </vault:uri>
 </define:actions>
 
 <define:content>
+    <?php
+    $timestamps = spiral(\Spiral\Snapshotter\Models\Timestamps::class);
+    ?>
     <vault:card title="<?= e(basename($snapshot->filename)) ?>">
-        <p class="grey-text"><?= $snapshot->when() ?> (<?= $snapshot->when(true) ?>)</p>
+        <p class="grey-text"><?= $timestamps->timeOccurred($snapshot) ?>
+            (<?= $timestamps->timeOccurred($snapshot, true) ?>)</p>
         <p><?= $snapshot->exception_classname ?></p>
         <p><?= $snapshot->filesize(true) ?></p>
     </vault:card>
@@ -47,7 +53,7 @@
             break;
         default:
             ?>
-            <iframe src="<?= vault()->uri('snapshots:iframe', ['id' => $snapshot->id]) ?>"
+            <iframe src="<?= vault()->uri('snapshots:iframe', ['id' => $snapshot->primaryKey()]) ?>"
                     width="100%" height="100%" frameborder="0" scrolling="no"
                     onload="javascript:resizeIframe(this);"></iframe>
         <?php } ?>

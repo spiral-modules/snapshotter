@@ -1,1 +1,4 @@
-.idea
+.idea/
+.env
+composer.phar
+vendor/

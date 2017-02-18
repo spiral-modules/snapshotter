@@ -37,38 +37,6 @@ Snapshotter is an addition to the vault module, so it uses database `vault`
 
 ---
 
-### Using PHP version < 7? 
-
-Create your own inherited class for `SnapshotService` with `createFromException` method overriding and replace `$exception` type with `\Exception` instead of `\Throwable`
-
-```php
-class LegacySnapshotService extends SnapshotService
-{
-    /**
-     * @param \Exception $exception
-     * @param string     $filename
-     * @param string     $teaser
-     * @param string     $hash
-     * @return Snapshot
-     */
-    public function createFromException(\Exception $exception, $filename, $teaser, $hash)
-    {
-        $fields = [
-            'exception_hash'      => $hash,
-            'filename'            => $filename,
-            'exception_teaser'    => $teaser,
-            'exception_classname' => get_class($exception),
-            'exception_message'   => $exception->getMessage(),
-            'exception_line'      => $exception->getLine(),
-            'exception_file'      => $exception->getFile(),
-            'exception_code'      => $exception->getCode(),
-        ];
-
-        return $this->getSource()->create($fields);
-    }
-}
-```
- 
 After that bind your new class before binding `Debug\SnapshotInterface::class`
 
 ```php
