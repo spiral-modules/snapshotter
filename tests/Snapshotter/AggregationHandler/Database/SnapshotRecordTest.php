@@ -32,11 +32,11 @@ class SnapshotRecordTest extends BaseTest
         $this->assertCount(1, $record->getIncidentsHistory());
 
         /** @var IncidentRecord $incident */
-        $incident = $record->getIncidentsHistory()->getIterator()->getArrayCopy()[0];
+        $incident = iterator_to_array($record->getIncidentsHistory())[0];
 
         $this->assertNotEmpty($incident);
         $this->assertNotEmpty($incident->getExceptionSource());
-        $this->assertTrue($incident->isStored());
+        $this->assertTrue($incident->status->isStored());
 
         //Suppress new history record
         $record->setSuppression(true);
@@ -47,17 +47,18 @@ class SnapshotRecordTest extends BaseTest
         $this->assertEquals(3, $record->count_occurred);
         $this->assertCount(2, $record->getIncidentsHistory());
 
-        $incident = $record->getIncidentsHistory()->getIterator()->getArrayCopy()[0];
+        $incident = iterator_to_array($record->getIncidentsHistory())[0];
 
         $this->assertNotEmpty($incident);
         $this->assertNotEmpty($incident->getExceptionSource());
-        $this->assertTrue($incident->isStored());
+        $this->assertTrue($incident->status->isStored());
 
-        $incident = $record->getIncidentsHistory()->getIterator()->getArrayCopy()[1];
+        $incident = iterator_to_array($record->getIncidentsHistory())[1];
 
         $this->assertNotEmpty($incident);
         $this->assertEmpty($incident->getExceptionSource());
-        $this->assertFalse($incident->isStored());
+        $this->assertFalse($incident->status->isStored());
+        $this->assertTrue($incident->status->isSuppressed());
 
         //Don't suppress new history record
         $record->setSuppression(false);
@@ -68,22 +69,23 @@ class SnapshotRecordTest extends BaseTest
         $this->assertEquals(4, $record->count_occurred);
         $this->assertCount(3, $record->getIncidentsHistory());
 
-        $incident = $record->getIncidentsHistory()->getIterator()->getArrayCopy()[0];
+        $incident = iterator_to_array($record->getIncidentsHistory())[0];
 
         $this->assertNotEmpty($incident);
         $this->assertNotEmpty($incident->getExceptionSource());
-        $this->assertTrue($incident->isStored());
+        $this->assertTrue($incident->status->isStored());
 
-        $incident = $record->getIncidentsHistory()->getIterator()->getArrayCopy()[1];
+        $incident = iterator_to_array($record->getIncidentsHistory())[1];
 
         $this->assertNotEmpty($incident);
         $this->assertEmpty($incident->getExceptionSource());
-        $this->assertFalse($incident->isStored());
+        $this->assertFalse($incident->status->isStored());
+        $this->assertTrue($incident->status->isSuppressed());
 
-        $incident = $record->getIncidentsHistory()->getIterator()->getArrayCopy()[2];
+        $incident = iterator_to_array($record->getIncidentsHistory())[2];
 
         $this->assertNotEmpty($incident);
         $this->assertNotEmpty($incident->getExceptionSource());
-        $this->assertTrue($incident->isStored());
+        $this->assertTrue($incident->status->isStored());
     }
 }

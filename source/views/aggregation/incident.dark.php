@@ -15,7 +15,7 @@
 </define:resources>
 
 <define:actions>
-    <?php if ($snapshot->isStored()) { ?>
+    <?php if ($snapshot->status->isStored()) { ?>
         <vault:uri target="snapshots:removeSnapshot" icon="delete"
                    class="btn red waves-effect waves-light"
                    options="<?= ['id' => $snapshot->primaryKey()] ?>">

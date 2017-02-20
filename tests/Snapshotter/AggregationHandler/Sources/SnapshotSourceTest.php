@@ -16,7 +16,7 @@ class SnapshotSourceTest extends BaseTest
         $snapshot = $this->makeSnapshot('custom error', 777);
         $this->handleSnapshot($snapshot, true);
 
-        $hash = AggregationHandler::makeHash($snapshot);
+        $hash = AggregationHandler\Services\SnapshotService::makeHash($snapshot);
         $hash2 = 'some second random hash';
 
         /** @var SnapshotSource $source */

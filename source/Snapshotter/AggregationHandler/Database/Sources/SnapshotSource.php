@@ -17,7 +17,7 @@ class SnapshotSource extends RecordSource
      */
     public function findByHash(string $hash)
     {
-        return $this->find()->where('exception_hash', '=', $hash)->findOne();
+        return $this->findOne(['exception_hash'=> $hash]);
     }
 
     /**
@@ -25,10 +25,12 @@ class SnapshotSource extends RecordSource
      *
      * @return RecordSelector
      */
-    public function findWithSnapshots(): RecordSelector
+    public function findWithLast(): RecordSelector
     {
-        return $this->find()->with('last_snapshot');
+        return $this->find()->with('last_incident', ['alias' => 'last_incident']);
     }
+
+    //для history load inload
 
 //    /**
 //     * todo refactor
@@ -48,8 +50,8 @@ class SnapshotSource extends RecordSource
 //     */
     public function findLast()
     {
-        return $this->findWithSnapshots()
-            ->orderBy('last_snapshot.time_created', SelectQuery::SORT_DESC)
+        return $this->findWithLast()
+            ->orderBy('last_incident.time_created', SelectQuery::SORT_DESC)
             ->findOne();
     }
 }

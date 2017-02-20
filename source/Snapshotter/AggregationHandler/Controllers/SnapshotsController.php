@@ -10,7 +10,12 @@ use Spiral\Http\Exceptions\ClientExceptions\ForbiddenException;
 use Spiral\Http\Exceptions\ClientExceptions\NotFoundException;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\Response\ResponseWrapper;
+use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
+use Spiral\Snapshotter\AggregationHandler\Database\Sources\IncidentSource;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\SnapshotSource;
+use Spiral\Snapshotter\AggregationHandler\Services\SnapshotService;
+use Spiral\Snapshotter\Helpers\Names;
+use Spiral\Snapshotter\Helpers\Timestamps;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Snapshotter\Database\SnapshotAggregation;
 use Spiral\Snapshotter\Database\AggregatedSnapshot;
@@ -34,48 +39,59 @@ class SnapshotsController extends Controller
 
     /**
      * @param SnapshotSource $source
-     * @return mixed
+     * @param Timestamps     $timestamps
+     * @param Names          $names
+     * @return string
      */
-    public function indexAction(SnapshotSource $source)
+    public function indexAction(SnapshotSource $source, Timestamps $timestamps, Names $names)
     {
-        $this->authorize('list');
+        $selector = $source->findWithLast()->orderBy(
+            'last_incident.time_created',
+            SelectQuery::SORT_DESC
+        );
 
-        return $this->views->render('snapshotter:list', [
-            'source' => $source->findWithSnapshots()
-                ->orderBy('last_snapshot.time_created', SelectQuery::SORT_DESC)
+        return $this->views->render('snapshotter:aggregation/list', [
+            'selector'     => $selector,
+            'lastSnapshot' => $source->findLast(),
+            'timestamps'   => $timestamps,
+            'names'        => $names
         ]);
     }
 
     /**
-     * @param string             $id
-     * @param AggregationService $aggregationService
-     * @param SnapshotSource     $snapshotSource
-     * @return mixed
+     * @param string          $id
+     * @param SnapshotService $service
+     * @param IncidentSource  $source
+     * @param Timestamps      $timestamps
+     * @param Names           $names
+     * @return string
      */
     public function editAction(
         $id,
-        AggregationService $aggregationService,
-        SnapshotSource $snapshotSource
+        SnapshotService $service,
+        IncidentSource $source,
+        Timestamps $timestamps,
+        Names $names
     ) {
-        /** @var SnapshotAggregation $aggregation */
-        $aggregation = $aggregationService->getSource()->findByPK($id);
-        if (empty($aggregation)) {
+        /** @var SnapshotRecord $snapshot */
+        $snapshot = $service->getSource()->findByPK($id);
+        if (empty($snapshot)) {
             throw new NotFoundException;
         }
 
         $this->authorize('view', compact('aggregation'));
 
-        $snapshot = null;
-        $source = $snapshotSource->findStored($aggregation)->orderBy('id', 'DESC');
-
-        if ($source->count() === 1) {
-            $snapshot = $source->findOne();
-        }
-
-        return $this->views->render(
-            'snapshotter:aggregation',
-            compact('source', 'snapshot', 'aggregation')
+        $source = $source->findBySnapshot($snapshot)->orderBy(
+            'time_created',
+            SelectQuery::SORT_DESC
         );
+
+        return $this->views->render('snapshotter:aggregation/snapshot', [
+            'source'     => $source,
+            'snapshot'   => $snapshot,
+            'timestamps' => $timestamps,
+            'names'      => $names
+        ]);
     }
 
     /**
@@ -116,7 +132,7 @@ class SnapshotsController extends Controller
 
         $this->authorize('view', compact('snapshot'));
 
-        return $this->views->render('snapshotter:snapshot', compact('snapshot'));
+        return $this->views->render('snapshotter:aggregation/incident', compact('snapshot'));
     }
 
     /**
@@ -244,7 +260,7 @@ class SnapshotsController extends Controller
         AggregationService $aggregationService
     ) {
         /**
-         * @var AggregatedSnapshot  $snapshot
+         * @var SnapshotRecord  $snapshot
          * @var SnapshotAggregation $aggregation
          */
         $snapshot = $snapshotSource->findByPK($id);
@@ -252,7 +268,7 @@ class SnapshotsController extends Controller
             throw new NotFoundException;
         }
 
-        if (!$snapshot->isStored()) {
+        if (!$snapshot->status->isStored()) {
             throw new ForbiddenException;
         }
 
@@ -268,7 +284,7 @@ class SnapshotsController extends Controller
 
         $snapshotSource->delete($snapshot);
 
-        $uri = $this->vault->uri('snapshots:edit', ['id' => $aggregation->id]);
+        $uri = $this->vault->uri('snapshots:edit', ['id' => $aggregation->primaryKey()]);
 
         if ($this->input->isAjax()) {
             return [

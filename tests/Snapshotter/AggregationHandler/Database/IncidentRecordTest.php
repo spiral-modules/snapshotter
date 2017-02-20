@@ -10,31 +10,6 @@ use Spiral\Tests\BaseTest;
 class IncidentRecordTest extends BaseTest
 {
     /**
-     * Status setters and getters
-     */
-    public function testStatus()
-    {
-        /** @var IncidentSource $source */
-        $source = $this->container->get(IncidentSource::class);
-        $incident = $this->createIncident($source);
-
-        //Stored by default
-        $this->assertTrue($incident->isStored());
-
-        $incident->status = 'deleted';
-        $this->assertTrue($incident->isDeleted());
-
-        $incident->status = 'stored';
-        $this->assertTrue($incident->isStored());
-
-        $incident->status = 'suppressed';
-        $this->assertTrue($incident->isSuppressed());
-
-        $incident->setDeleted();
-        $this->assertEquals('deleted', $incident->status);
-    }
-
-    /**
      * Test suppression.
      */
     public function testSuppress()
@@ -43,11 +18,11 @@ class IncidentRecordTest extends BaseTest
         $source = $this->container->get(IncidentSource::class);
         $incident = $this->createIncident($source);
 
-        $this->assertTrue($incident->isStored());
+        $this->assertTrue($incident->status->isLast());
         $this->assertNotEmpty($incident->getExceptionSource());
 
         $incident->suppress();
-        $this->assertTrue($incident->isSuppressed());
+        $this->assertTrue($incident->status->isSuppressed());
         $this->assertEmpty($incident->getExceptionSource());
     }
 
@@ -58,8 +33,7 @@ class IncidentRecordTest extends BaseTest
     private function createIncident(IncidentSource $source): IncidentRecord
     {
         $snapshot = $this->makeSnapshot('custom error', 123);
-        $hash = AggregationHandler::makeHash($snapshot);
-        $incident = $source->createFromSnapshot($snapshot, $hash);
+        $incident = $source->createFromSnapshot($snapshot);
 
         $incident->save();
 

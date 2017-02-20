@@ -80,7 +80,7 @@ class AggregationHandlerTest extends BaseTest
         $lastIncident = $snapshotRecord->getLastIncident();
         $this->assertNotEmpty($lastIncident);
 
-        $this->assertEquals(true, $lastIncident->isStored());
+        $this->assertEquals(true, $lastIncident->status->isLast());
 
         $this->assertEquals(
             get_class($snapshot->getException()),
@@ -98,7 +98,7 @@ class AggregationHandlerTest extends BaseTest
         );
 
         $this->assertEquals(
-            AggregationHandler::makeHash($snapshot),
+            AggregationHandler\Services\SnapshotService::makeHash($snapshot),
             $lastIncident->getExceptionHash()
         );
 

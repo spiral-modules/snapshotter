@@ -36,7 +36,7 @@ class IncidentSourceTest extends BaseTest
         $incident = $source->findOne();
 
         $this->assertCount(1, $source->find());
-        $this->assertEquals(true, $incident->isDeleted());
+        $this->assertEquals(true, $incident->status->isDeleted());
     }
 
     public function testFindStored()
@@ -65,8 +65,7 @@ class IncidentSourceTest extends BaseTest
     private function createIncident(IncidentSource $source): IncidentRecord
     {
         $snapshot = $this->makeSnapshot('custom error', 123);
-        $hash = AggregationHandler::makeHash($snapshot);
-        $incident = $source->createFromSnapshot($snapshot, $hash);
+        $incident = $source->createFromSnapshot($snapshot);
 
         $incident->save();
 

@@ -16,18 +16,18 @@ class AggregationHandler extends Service implements HandlerInterface
     private $source;
 
     /** @var SnapshotService */
-    private $aggregations;
+    private $service;
 
     /**
      * Aggregation constructor.
      *
      * @param IncidentSource  $snapshots
-     * @param SnapshotService $aggregations
+     * @param SnapshotService $service
      */
-    public function __construct(IncidentSource $snapshots, SnapshotService $aggregations)
+    public function __construct(IncidentSource $snapshots, SnapshotService $service)
     {
         $this->source = $snapshots;
-        $this->aggregations = $aggregations;
+        $this->service = $service;
     }
 
     /**
@@ -37,25 +37,12 @@ class AggregationHandler extends Service implements HandlerInterface
      */
     public function registerSnapshot(SnapshotInterface $snapshot)
     {
-        $hash = self::makeHash($snapshot);
-
-        /** @var IncidentRecord $snapshotEvent */
-        $snapshotEvent = $this->source->createFromSnapshot($snapshot, $hash);
+        /** @var IncidentRecord $incident */
+        $incident = $this->source->createFromSnapshot($snapshot);
 
         /** @var SnapshotRecord $aggregation */
-        $aggregation = $this->aggregations->getByHash($hash);
-        $aggregation->pushIncident($snapshotEvent);
+        $aggregation = $this->service->getByHash($this->service->makeHash($snapshot));
+        $aggregation->pushIncident($incident);
         $aggregation->save();
-    }
-
-    /**
-     * Creates unique hash to allow aggregating snapshots.
-     *
-     * @param SnapshotInterface $snapshot
-     * @return string
-     */
-    public static function makeHash(SnapshotInterface $snapshot): string
-    {
-        return hash('sha256', $snapshot->getMessage());
     }
 }

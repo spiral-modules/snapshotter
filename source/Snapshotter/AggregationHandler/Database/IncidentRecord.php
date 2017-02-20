@@ -5,23 +5,22 @@ namespace Spiral\Snapshotter\AggregationHandler\Database;
 use Spiral\Models\Accessors\SqlTimestamp;
 use Spiral\Models\Traits\TimestampsTrait;
 use Spiral\ORM\Record;
-use Spiral\Support\Strings;
+use Spiral\Snapshotter\AggregationHandler\Database\Types\IncidentStatus;
 
 /**
  * Class Aggregation
  *
- * @property int          $id
- * @property SqlTimestamp time_created
- * @property string       $exception_source
- * @property string       $status
- * @property string       $exception_hash
- * @property string       $exception_teaser
- * @property string       $exception_classname
- * @property string       $exception_message
- * @property string       $exception_line
- * @property string       $exception_file
- * @property string       $exception_code
- * @package Spiral\Snapshotter\Database
+ * @property int            $id
+ * @property SqlTimestamp   time_created
+ * @property string         $exception_source
+ * @property IncidentStatus $status
+ * @property string         $exception_hash
+ * @property string         $exception_teaser
+ * @property string         $exception_classname
+ * @property string         $exception_message
+ * @property string         $exception_line
+ * @property string         $exception_file
+ * @property string         $exception_code
  */
 class IncidentRecord extends Record
 {
@@ -30,7 +29,7 @@ class IncidentRecord extends Record
     /**
      * {@inheritdoc}
      */
-    //const DATABASE = 'snapshots';
+    const DATABASE = 'snapshots';
 
     /**
      * {@inheritdoc}
@@ -38,7 +37,7 @@ class IncidentRecord extends Record
     const SCHEMA = [
         //primary fields
         'id'                  => 'primary',
-        'status'              => 'enum(stored,deleted,suppressed)',
+        'status'              => IncidentStatus::class,
 
         //exception fields
         'exception_hash'      => 'string',
@@ -66,51 +65,12 @@ class IncidentRecord extends Record
     ];
 
     /**
-     * {@inheritdoc}
-     */
-    const DEFAULTS = [
-        'status' => 'stored'
-    ];
-
-    /**
-     * @return bool
-     */
-    public function isDeleted(): bool
-    {
-        return $this->status == 'deleted';
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSuppressed(): bool
-    {
-        return $this->status == 'suppressed';
-    }
-
-    /**
-     * @return bool
-     */
-    public function isStored(): bool
-    {
-        return $this->status == 'stored';
-    }
-
-    /**
-     *
+     * Suppress incident. Set according status and clean source.
      */
     public function suppress()
     {
-        $this->status = 'suppressed';
+        $this->status->setSuppressed();
         $this->exception_source = null;
-    }
-
-    /**
-     *
-     */
-    public function setDeleted()
-    {
-        $this->status = 'deleted';
     }
 
     /**
@@ -126,15 +86,18 @@ class IncidentRecord extends Record
         return gzdecode($this->exception_source);
     }
 
-    public function setExceptionSource($source)
+    /**
+     * @param string $source
+     */
+    public function setExceptionSource(string $source)
     {
         $this->exception_source = gzencode($source, 9);
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getExceptionCode()
+    public function getExceptionCode(): int
     {
         return $this->exception_code;
     }
@@ -142,7 +105,7 @@ class IncidentRecord extends Record
     /**
      * @return string
      */
-    public function getExceptionHash()
+    public function getExceptionHash(): string
     {
         return $this->exception_hash;
     }
@@ -150,7 +113,7 @@ class IncidentRecord extends Record
     /**
      * @return string
      */
-    public function getExceptionTeaser()
+    public function getExceptionTeaser(): string
     {
         return $this->exception_teaser;
     }
@@ -158,7 +121,7 @@ class IncidentRecord extends Record
     /**
      * @return string
      */
-    public function getExceptionClass()
+    public function getExceptionClass(): string
     {
         return $this->exception_classname;
     }
@@ -166,15 +129,15 @@ class IncidentRecord extends Record
     /**
      * @return string
      */
-    public function getExceptionMessage()
+    public function getExceptionMessage(): string
     {
         return $this->exception_message;
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getExceptionLine()
+    public function getExceptionLine(): int
     {
         return $this->exception_line;
     }
@@ -182,7 +145,7 @@ class IncidentRecord extends Record
     /**
      * @return string
      */
-    public function getExceptionFile()
+    public function getExceptionFile(): string
     {
         return $this->exception_file;
     }

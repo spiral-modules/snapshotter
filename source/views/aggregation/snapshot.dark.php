@@ -120,14 +120,14 @@
             <grid:cell label="[[Filename:]]" value="<?= e(basename($entity->filename)) ?>"/>
 
             <grid:cell style="text-align:right">
-                <?php if ($entity->isStored()) { ?>
+                <?php if ($entity->status->isStored()) { ?>
                     <vault:uri target="snapshots:snapshot" icon="edit" class="btn-flat waves-effect"
                                options="<?= ['id' => $entity->primaryKey()] ?>"/>
                 <?php } ?>
             </grid:cell>
 
             <grid:cell style="text-align:right">
-                <?php if ($entity->isStored()) { ?>
+                <?php if ($entity->status->isStored()) { ?>
                     <vault:uri target="snapshots:removeSnapshot" icon="delete"
                                class="btn red waves-effect waves-light"
                                options="<?= ['id' => $entity->primaryKey()] ?>">

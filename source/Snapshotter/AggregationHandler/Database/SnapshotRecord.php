@@ -10,18 +10,13 @@ use Spiral\ORM\Record;
 /**
  * Class Aggregation
  *
- * @property int          $id
- * @property SqlTimestamp $time_created
- * @property SqlTimestamp $last_occurred_time
- * @property bool         $suppression
- * @property string       $exception_hash
- * @property int          $count_occurred_total
- * @property int          $count_occurred_daily
- * @property int          $count_occurred_weekly
- * @property int          $count_occurred_monthly
- * @property int          $count_occurred_yearly
- * @method HasManyRelation $snapshots
- * @package Spiral\Snapshotter\Database
+ * @property SqlTimestamp   $time_created
+ * @property bool           $suppression
+ * @property string         $exception_hash
+ * @property int            $count_occurred
+ * @property IncidentRecord $last_incident
+ *
+ * @method HasManyRelation $incidents
  */
 class SnapshotRecord extends Record
 {
@@ -30,7 +25,7 @@ class SnapshotRecord extends Record
     /**
      * {@inheritdoc}
      */
-    //const DATABASE = 'snapshots';
+    const DATABASE = 'snapshots';
 
     /**
      * {@inheritdoc}
@@ -48,13 +43,14 @@ class SnapshotRecord extends Record
 
         //All occurred incidents before last one
         'incidents'      => [
-            self::HAS_MANY            => IncidentRecord::class
+            self::HAS_MANY => IncidentRecord::class
         ],
 
         //Last occurred incident
         'last_incident'  => [
-            self::BELONGS_TO          => IncidentRecord::class,
-            self::NULLABLE            => true
+            self::BELONGS_TO        => IncidentRecord::class,
+            self::NULLABLE          => true,
+            self::CREATE_CONSTRAINT => false
         ]
     ];
 

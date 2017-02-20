@@ -7,18 +7,19 @@ use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
+use Spiral\Snapshotter\AggregationHandler\Services\SnapshotService;
 
 class IncidentSource extends RecordSource
 {
     const RECORD = IncidentRecord::class;
 
     /**
-     * @param IncidentRecord $snapshot
+     * @param IncidentRecord $incident
      */
-    public function delete(IncidentRecord $snapshot)
+    public function delete(IncidentRecord $incident)
     {
-        $snapshot->setDeleted();
-        $snapshot->save();
+        $incident->status->setDeleted();
+        $incident->save();
     }
 
     /**
@@ -49,17 +50,13 @@ class IncidentSource extends RecordSource
 
     /**
      * @param SnapshotInterface $snapshot
-     * @param string            $hash
      * @return IncidentRecord
      */
-    public function createFromSnapshot(
-        SnapshotInterface $snapshot,
-        string $hash
-    ): IncidentRecord
+    public function createFromSnapshot(SnapshotInterface $snapshot): IncidentRecord
     {
         $exception = $snapshot->getException();
         $fields = [
-            'exception_hash'      => $hash,
+            'exception_hash'      => SnapshotService::makeHash($snapshot),
             'exception_teaser'    => $snapshot->getMessage(),
             'exception_classname' => get_class($exception),
             'exception_message'   => $exception->getMessage(),

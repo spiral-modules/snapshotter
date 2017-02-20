@@ -3,6 +3,7 @@
 namespace Spiral\Snapshotter\AggregationHandler\Services;
 
 use Spiral\Core\Service;
+use Spiral\Debug\SnapshotInterface;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\SnapshotSource;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\IncidentSource;
@@ -82,5 +83,16 @@ class SnapshotService extends Service
             '>=',
             (new \DateTime('now'))->sub($interval)
         )->count();
+    }
+
+    /**
+     * Creates unique hash to allow aggregating snapshots.
+     *
+     * @param SnapshotInterface $snapshot
+     * @return string
+     */
+    public static function makeHash(SnapshotInterface $snapshot): string
+    {
+        return hash('sha256', $snapshot->getMessage());
     }
 }
