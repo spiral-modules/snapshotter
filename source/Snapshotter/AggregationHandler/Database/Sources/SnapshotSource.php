@@ -17,12 +17,10 @@ class SnapshotSource extends RecordSource
      */
     public function findByHash(string $hash)
     {
-        return $this->findOne(['exception_hash'=> $hash]);
+        return $this->findOne(['exception_hash' => $hash]);
     }
 
     /**
-     * todo refactor
-     *
      * @return RecordSelector
      */
     public function findWithLast(): RecordSelector
@@ -30,28 +28,31 @@ class SnapshotSource extends RecordSource
         return $this->find()->with('last_incident', ['alias' => 'last_incident']);
     }
 
-    //для history load inload
-
-//    /**
-//     * todo refactor
-//     *
-//     * @param SnapshotRecord $snapshot
-//     * @return null|SnapshotRecord
-//     */
-//    public function findBySnapshot(SnapshotRecord $snapshot)
-//    {
-//        return $snapshot->aggregation;
-//    }
-
-//    /**
-//     * todo refactor
-//     *
-//     * @return null|SnapshotRecord
-//     */
+    /**
+     * @return null|SnapshotRecord
+     */
     public function findLast()
     {
         return $this->findWithLast()
             ->orderBy('last_incident.time_created', SelectQuery::SORT_DESC)
             ->findOne();
+    }
+
+    /**
+     * Snapshot with last incident (should not be archived in the history).
+     *
+     * @param string|int $id
+     * @param array      $load
+     * @return null|SnapshotRecord
+     */
+    public function findWithLastByPK($id, array $load = [])
+    {
+        /** @var SnapshotRecord|null $snapshot */
+        $snapshot = $this->findByPK($id, $load);
+        if (empty($snapshot) || empty($snapshot->getLastIncident())) {
+            return null;
+        }
+
+        return $snapshot;
     }
 }

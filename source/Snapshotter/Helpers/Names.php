@@ -4,8 +4,14 @@ namespace Spiral\Snapshotter\Helpers;
 
 class Names
 {
-    public function onlyName($name)
+    /**
+     * @param string $name
+     * @return string
+     */
+    public function onlyName(string $name): string
     {
+        $name = str_replace('/', '\\', $name);
+
         $pos = mb_strripos($name, '\\');
 
         if ($pos !== false) {
@@ -13,10 +19,5 @@ class Names
         }
 
         return $name;
-    }
-
-    public function filename($name)
-    {
-
     }
 }

@@ -4,6 +4,7 @@ namespace Spiral\Snapshotter\AggregationHandler\Database;
 
 use Spiral\Models\Accessors\SqlTimestamp;
 use Spiral\Models\Traits\TimestampsTrait;
+use Spiral\ORM\Entities\Relations\HasOneRelation;
 use Spiral\ORM\Record;
 use Spiral\Snapshotter\AggregationHandler\Database\Types\IncidentStatus;
 
@@ -21,6 +22,8 @@ use Spiral\Snapshotter\AggregationHandler\Database\Types\IncidentStatus;
  * @property string         $exception_line
  * @property string         $exception_file
  * @property string         $exception_code
+ * @property HasOneRelation $parent_snapshot
+ * @property HasOneRelation $snapshot
  */
 class IncidentRecord extends Record
 {
@@ -47,7 +50,7 @@ class IncidentRecord extends Record
         'exception_message'   => 'string',
         'exception_line'      => 'int',
         'exception_file'      => 'string',
-        'exception_code'      => 'int'
+        'exception_code'      => 'int',
     ];
 
     /**
@@ -74,6 +77,16 @@ class IncidentRecord extends Record
     }
 
     /**
+     * Delete override.
+     */
+    public function delete()
+    {
+        $this->status->setDeleted();
+        $this->exception_source = null;
+        $this->save();
+    }
+
+    /**
      * @return null|string
      */
     public function getExceptionSource()
@@ -83,7 +96,7 @@ class IncidentRecord extends Record
             return null;
         }
 
-        return gzdecode($this->exception_source);
+        return ($this->exception_source);
     }
 
     /**
@@ -148,5 +161,19 @@ class IncidentRecord extends Record
     public function getExceptionFile(): string
     {
         return $this->exception_file;
+    }
+
+    /**
+     * Get snapshot record related to this incident.
+     *
+     * @return SnapshotRecord
+     */
+    public function getSnapshot(): SnapshotRecord
+    {
+        if ($this->status->isLast()) {
+            return $this->snapshot;
+        }
+
+        return $this->parent_snapshot;
     }
 }

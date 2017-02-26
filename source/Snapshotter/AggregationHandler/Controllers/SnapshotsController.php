@@ -6,10 +6,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\Controller;
 use Spiral\Core\Traits\AuthorizesTrait;
 use Spiral\Database\Builders\SelectQuery;
-use Spiral\Http\Exceptions\ClientExceptions\ForbiddenException;
 use Spiral\Http\Exceptions\ClientExceptions\NotFoundException;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\Response\ResponseWrapper;
+use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\IncidentSource;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\SnapshotSource;
@@ -17,10 +17,6 @@ use Spiral\Snapshotter\AggregationHandler\Services\SnapshotService;
 use Spiral\Snapshotter\Helpers\Names;
 use Spiral\Snapshotter\Helpers\Timestamps;
 use Spiral\Translator\Traits\TranslatorTrait;
-use Spiral\Snapshotter\Database\SnapshotAggregation;
-use Spiral\Snapshotter\Database\AggregatedSnapshot;
-use Spiral\Snapshotter\Database\Sources\AggregationSource;
-use Spiral\Snapshotter\Models\AggregationService;
 
 use Spiral\Vault\Vault;
 use Spiral\Views\ViewManager;
@@ -38,6 +34,8 @@ class SnapshotsController extends Controller
     const GUARD_NAMESPACE = 'vault.snapshots';
 
     /**
+     * List of snapshots.
+     *
      * @param SnapshotSource $source
      * @param Timestamps     $timestamps
      * @param Names          $names
@@ -59,7 +57,9 @@ class SnapshotsController extends Controller
     }
 
     /**
-     * @param string          $id
+     * View snapshot.
+     *
+     * @param string|int      $id
      * @param SnapshotService $service
      * @param IncidentSource  $source
      * @param Timestamps      $timestamps
@@ -74,20 +74,23 @@ class SnapshotsController extends Controller
         Names $names
     ) {
         /** @var SnapshotRecord $snapshot */
-        $snapshot = $service->getSource()->findByPK($id);
+        $snapshot = $service->getSource()->findWithLastByPK($id);
         if (empty($snapshot)) {
             throw new NotFoundException;
         }
 
-        $this->authorize('view', compact('aggregation'));
+        $this->authorize('view', compact('snapshot'));
 
-        $source = $source->findBySnapshot($snapshot)->orderBy(
+        $selector = $source->findSnapshotHistory($snapshot)->orderBy(
             'time_created',
             SelectQuery::SORT_DESC
         );
 
+        $occurred = $service->countOccurred($snapshot, $source);
+
         return $this->views->render('snapshotter:aggregation/snapshot', [
-            'source'     => $source,
+            'selector'   => $selector,
+            'occurred'   => $occurred,
             'snapshot'   => $snapshot,
             'timestamps' => $timestamps,
             'names'      => $names
@@ -95,22 +98,24 @@ class SnapshotsController extends Controller
     }
 
     /**
-     * @param string            $id
-     * @param AggregationSource $source
+     * Suppression snapshot state.
+     *
+     * @param string|int     $id
+     * @param SnapshotSource $source
      * @return array
      */
-    public function suppressAction($id, AggregationSource $source)
+    public function suppressAction($id, SnapshotSource $source)
     {
-        /** @var SnapshotAggregation $aggregation */
-        $aggregation = $source->findByPK($id);
-        if (empty($aggregation)) {
+        /** @var SnapshotRecord $snapshot */
+        $snapshot = $source->findWithLastByPK($id);
+        if (empty($snapshot)) {
             throw new NotFoundException;
         }
 
-        $this->authorize('edit', compact('aggregation'));
+        $this->authorize('edit', compact('snapshot'));
 
-        $aggregation->setSuppression($this->input->data('suppression', false));
-        $aggregation->save();
+        $snapshot->setSuppression($this->input->data('suppression', false));
+        $snapshot->save();
 
         return [
             'status'  => 200,
@@ -119,71 +124,37 @@ class SnapshotsController extends Controller
     }
 
     /**
-     * @param string         $id
-     * @param SnapshotSource $source
-     * @return mixed
-     */
-    public function snapshotAction($id, SnapshotSource $source)
-    {
-        $snapshot = $source->findByPK($id);
-        if (empty($snapshot)) {
-            throw new NotFoundException;
-        }
-
-        $this->authorize('view', compact('snapshot'));
-
-        return $this->views->render('snapshotter:aggregation/incident', compact('snapshot'));
-    }
-
-    /**
-     * @param string         $id
+     * View last snapshot incident source.
+     *
+     * @param string|int     $id
      * @param SnapshotSource $source
      * @return string
      */
     public function iframeAction($id, SnapshotSource $source)
     {
-        /** @var AggregatedSnapshot $snapshot */
-        $snapshot = $source->findByPK($id);
+        /** @var SnapshotRecord $snapshot */
+        $snapshot = $source->findWithLastByPK($id);
         if (empty($snapshot)) {
             throw new NotFoundException;
         }
 
         $this->authorize('view', compact('snapshot'));
 
-        try {
-            return file_get_contents($snapshot->filename);
-        } catch (\Exception $exception) {
-            throw new NotFoundException;
-        }
+        return $snapshot->getLastIncident()->getExceptionSource();
     }
 
     /**
-     * @param AggregationService $aggregationService
-     * @param AggregationSource  $aggregationSource
-     * @param SnapshotSource     $snapshotSource
-     * @return array
+     * Remove all snapshots with all incident records.
+     *
+     * @param SnapshotService $service
+     * @return array|\Psr\Http\Message\ResponseInterface
      */
-    public function removeAllAction(
-        AggregationService $aggregationService,
-        AggregationSource $aggregationSource,
-        SnapshotSource $snapshotSource
-    ) {
-        $this->authorize('remove');
+    public function removeAllAction(SnapshotService $service)
+    {
+        $this->authorize('removeAll');
 
-        /** @var SnapshotAggregation $aggregation */
-        foreach ($aggregationSource->find() as $aggregation) {
-            $countDeleted = 0;
-            if (!empty($snapshotSource->findStored($aggregation)->count())) {
-                foreach ($snapshotSource->findStored($aggregation) as $snapshot) {
-                    $countDeleted++;
-                    $snapshotSource->delete($snapshot);
-                }
-            }
-
-            if (!empty($countDeleted)) {
-                $aggregationService->deleteSnapshots($aggregation, $countDeleted);
-                $aggregation->save();
-            }
+        foreach ($service->getSource()->findWithLast() as $snapshot) {
+            $service->delete($snapshot);
         }
 
         $uri = $this->vault->uri('snapshots');
@@ -191,7 +162,7 @@ class SnapshotsController extends Controller
         if ($this->input->isAjax()) {
             return [
                 'status'  => 200,
-                'message' => $this->say('Snapshot deleted.'),
+                'message' => $this->say('Snapshots deleted.'),
                 'action'  => ['redirect' => $uri]
             ];
         } else {
@@ -200,96 +171,213 @@ class SnapshotsController extends Controller
     }
 
     /**
-     * @param string                 $id
-     * @param AggregationService     $aggregationService
-     * @param SnapshotSource         $snapshotSource
+     * Remove single snapshot with all incident records.
+     *
+     * @param string|int             $id
+     * @param SnapshotService        $service
      * @param ServerRequestInterface $request
      * @return array
      */
-    public function removeSnapshotsAction(
+    public function removeAction(
         $id,
-        AggregationService $aggregationService,
-        SnapshotSource $snapshotSource,
+        SnapshotService $service,
         ServerRequestInterface $request
     ) {
-        /**
-         * @var SnapshotAggregation $aggregation
-         */
-        $aggregation = $aggregationService->getSource()->findByPK($id);
-        if (empty($aggregation)) {
-            throw new NotFoundException;
-        }
-
-        $this->authorize('remove', compact('aggregation'));
-
-        $countDeleted = 0;
-        if (!empty($snapshotSource->findStored($aggregation)->count())) {
-            foreach ($snapshotSource->findStored($aggregation) as $snapshot) {
-                $countDeleted++;
-                $snapshotSource->delete($snapshot);
-            }
-        }
-
-        if (!empty($countDeleted)) {
-            $aggregationService->deleteSnapshots($aggregation, $countDeleted);
-            $aggregation->save();
-        }
-
-        $uri = $request->getServerParams()['HTTP_REFERER'];
-
-        if ($this->input->isAjax()) {
-            return [
-                'status'  => 200,
-                'message' => $this->say('Snapshots aggregation deleted.'),
-                'action'  => ['redirect' => $uri]
-            ];
-        } else {
-            return $this->response->redirect($uri);
-        }
-    }
-
-    /**
-     * @param string             $id
-     * @param SnapshotSource     $snapshotSource
-     * @param AggregationService $aggregationService
-     * @return array
-     */
-    public function removeSnapshotAction(
-        $id,
-        SnapshotSource $snapshotSource,
-        AggregationService $aggregationService
-    ) {
-        /**
-         * @var SnapshotRecord  $snapshot
-         * @var SnapshotAggregation $aggregation
-         */
-        $snapshot = $snapshotSource->findByPK($id);
+        /** @var SnapshotRecord $snapshot */
+        $snapshot = $service->getSource()->findWithLastByPK($id);
         if (empty($snapshot)) {
             throw new NotFoundException;
         }
 
-        if (!$snapshot->status->isStored()) {
-            throw new ForbiddenException;
-        }
+        $this->authorize('remove', compact('snapshot'));
 
-        $aggregation = $aggregationService->getSource()->findBySnapshot($snapshot);
-        if (empty($aggregation)) {
-            throw new NotFoundException;
-        }
+        $service->delete($snapshot);
 
-        $this->authorize('remove', compact('aggregation', 'snapshot'));
-
-        $aggregationService->deleteSnapshots($aggregation, 1);
-        $aggregation->save();
-
-        $snapshotSource->delete($snapshot);
-
-        $uri = $this->vault->uri('snapshots:edit', ['id' => $aggregation->primaryKey()]);
+        $uri = $this->removeBackURI($request);
 
         if ($this->input->isAjax()) {
             return [
                 'status'  => 200,
                 'message' => $this->say('Snapshot deleted.'),
+                'action'  => ['redirect' => $uri]
+            ];
+        } else {
+            return $this->response->redirect($uri);
+        }
+    }
+
+    /**
+     * Build redirect URI for removal operation.
+     *
+     * @param ServerRequestInterface $request
+     * @return \Psr\Http\Message\UriInterface
+     */
+    protected function removeBackURI(ServerRequestInterface $request)
+    {
+        $query = $request->getQueryParams();
+        if (array_key_exists('backToList', $query)) {
+            $uri = $this->vault->uri('snapshots');
+        } else {
+            $uri = $request->getServerParams()['HTTP_REFERER'];
+        }
+
+        return $uri;
+    }
+
+    /**
+     * Suppress snapshot incident. Can suppress only stored snapshots.
+     *
+     * @param string|int     $id
+     * @param IncidentSource $incidentSource
+     * @param SnapshotSource $snapshotSource
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function suppressIncidentAction(
+        $id,
+        IncidentSource $incidentSource,
+        SnapshotSource $snapshotSource
+    ) {
+        /** @var SnapshotRecord $snapshot */
+        $snapshot = $snapshotSource->findWithLastByPK($id);
+        if (empty($snapshot)) {
+            throw new NotFoundException;
+        }
+
+        /** @var IncidentRecord $incident */
+        $incident = $incidentSource->findStoredBySnapshotByPK(
+            $snapshot,
+            $this->input->query('incident')
+        );
+        if (empty($incident)) {
+            throw new NotFoundException;
+        }
+
+        $this->authorize('edit', compact('snapshot'));
+
+        $incident->suppress();
+        $incident->save();
+
+        $uri = $this->vault
+            ->uri('snapshots:edit', ['id' => $snapshot->primaryKey()])
+            ->withFragment('history');
+
+        if ($this->input->isAjax()) {
+            return [
+                'status'  => 200,
+                'message' => $this->say('Snapshot incident suppressed.'),
+                'action'  => ['redirect' => $uri]
+            ];
+        } else {
+            return $this->response->redirect($uri);
+        }
+    }
+
+    /**
+     * View snapshot incident.
+     *
+     * @param string|int     $id
+     * @param IncidentSource $incidentSource
+     * @param SnapshotSource $snapshotSource
+     * @return string
+     */
+    public function incidentAction(
+        $id,
+        IncidentSource $incidentSource,
+        SnapshotSource $snapshotSource
+    ) {
+        /** @var SnapshotRecord $snapshot */
+        $snapshot = $snapshotSource->findWithLastByPK($id);
+        if (empty($snapshot)) {
+            throw new NotFoundException;
+        }
+
+        /** @var IncidentRecord $incident */
+        $incident = $incidentSource->findStoredBySnapshotByPK(
+            $snapshot,
+            $this->input->query('incident')
+        );
+        if (empty($incident)) {
+            throw new NotFoundException;
+        }
+
+        $this->authorize('view', compact('snapshot'));
+
+        return $this->views->render('snapshotter:aggregation/incident', compact('incident'));
+    }
+
+    /**
+     * View snapshot incident source.
+     *
+     * @param string|int     $id
+     * @param IncidentSource $incidentSource
+     * @param SnapshotSource $snapshotSource
+     * @return null|string
+     */
+    public function iframeIncidentAction(
+        $id,
+        IncidentSource $incidentSource,
+        SnapshotSource $snapshotSource
+    ) {
+        /** @var SnapshotRecord $snapshot */
+        $snapshot = $snapshotSource->findWithLastByPK($id);
+        if (empty($snapshot)) {
+            throw new NotFoundException;
+        }
+
+        /** @var IncidentRecord $incident */
+        $incident = $incidentSource->findStoredBySnapshotByPK(
+            $snapshot,
+            $this->input->query('incident')
+        );
+        if (empty($incident)) {
+            throw new NotFoundException;
+        }
+
+        $this->authorize('view', compact('snapshot'));
+
+        return $incident->getExceptionSource();
+    }
+
+    /**
+     * Remove snapshot incident. Clean source and delete.
+     *
+     * @param string|int     $id
+     * @param IncidentSource $incidentSource
+     * @param SnapshotSource $snapshotSource
+     * @return array
+     */
+    public function removeIncidentAction(
+        $id,
+        IncidentSource $incidentSource,
+        SnapshotSource $snapshotSource
+    ) {
+        /** @var SnapshotRecord $snapshot */
+        $snapshot = $snapshotSource->findWithLastByPK($id);
+        if (empty($snapshot)) {
+            throw new NotFoundException;
+        }
+
+        /** @var IncidentRecord $incident */
+        $incident = $incidentSource->findBySnapshotByPK(
+            $snapshot,
+            $this->input->query('incident')
+        );
+        if (empty($incident)) {
+            throw new NotFoundException;
+        }
+
+        $this->authorize('edit', compact('snapshot'));
+
+        $incident->delete();
+
+        $uri = $this->vault
+            ->uri('snapshots:edit', ['id' => $snapshot->primaryKey()])
+            ->withFragment('history');
+
+        if ($this->input->isAjax()) {
+            return [
+                'status'  => 200,
+                'message' => $this->say('Snapshot incident deleted.'),
                 'action'  => ['redirect' => $uri]
             ];
         } else {

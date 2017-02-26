@@ -4,7 +4,6 @@ namespace Spiral\Snapshotter;
 
 use Spiral\Core\Service;
 use Spiral\Debug\SnapshotInterface;
-use Spiral\Snapshotter\HandlerInterface;
 use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\IncidentSource;
@@ -33,16 +32,16 @@ class AggregationHandler extends Service implements HandlerInterface
     /**
      * Create snapshot aggregation and aggregated snapshot and tie them together.
      *
-     * @param SnapshotInterface $snapshot
+     * @param SnapshotInterface $snapshotInterface
      */
-    public function registerSnapshot(SnapshotInterface $snapshot)
+    public function registerSnapshot(SnapshotInterface $snapshotInterface)
     {
         /** @var IncidentRecord $incident */
-        $incident = $this->source->createFromSnapshot($snapshot);
+        $incident = $this->source->createFromSnapshot($snapshotInterface);
 
-        /** @var SnapshotRecord $aggregation */
-        $aggregation = $this->service->getByHash($this->service->makeHash($snapshot));
-        $aggregation->pushIncident($incident);
-        $aggregation->save();
+        /** @var SnapshotRecord $snapshot */
+        $snapshot = $this->service->getByHash($this->service->makeHash($snapshotInterface));
+        $snapshot->pushIncident($incident);
+        $snapshot->save();
     }
 }

@@ -46,8 +46,10 @@
         </grid:cell>
         <grid:cell label="[[Message:]]">
             <span title="<?= e($entity->last_incident->getExceptionMessage()) ?>">
-                <?= e(\Spiral\Support\Strings::shorter($entity->last_incident->getExceptionMessage(),
-                    50)) ?>
+                <?= e(\Spiral\Support\Strings::shorter(
+                    $entity->last_incident->getExceptionMessage(),
+                    40
+                )) ?>
             </span>
         </grid:cell>
         <grid:cell label="[[Class:]]">
@@ -57,7 +59,10 @@
         </grid:cell>
         <grid:cell label="[[File:]]">
             <span title="<?= e($entity->last_incident->getExceptionFile()) ?>">
-                <?= e($names->onlyName($entity->last_incident->getExceptionFile())) ?>
+                <?= e(\Spiral\Support\Strings::shorter(
+                    $names->onlyName($entity->last_incident->getExceptionFile()),
+                    40
+                )) ?>
             </span>
         </grid:cell>
         <grid:cell label="[[Code:]]">
@@ -83,9 +88,9 @@
                        class="btn-flat waves-effect"/>
         </grid:cell>
         <grid:cell style="text-align:right">
-            <vault:uri target="snapshots:removeSnapshots" icon="delete"
+            <vault:uri target="snapshots:remove" icon="delete"
                        class="btn red waves-effect waves-light"
-                       options="<?= ['id' => $entity->primaryKey()] ?>"></vault:uri>
+                       options="<?= ['id' => $entity->primaryKey()] ?>"/>
         </grid:cell>
     </vault:grid>
 </define:content>

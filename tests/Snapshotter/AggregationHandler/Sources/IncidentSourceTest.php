@@ -30,7 +30,7 @@ class IncidentSourceTest extends BaseTest
         $source = $this->container->get(IncidentSource::class);
         $incident = $this->createIncident($source);
 
-        $source->delete($incident);
+        $incident->delete();
 
         /** @var IncidentRecord $incident */
         $incident = $source->findOne();
@@ -48,14 +48,14 @@ class IncidentSourceTest extends BaseTest
         $source = $this->container->get(IncidentSource::class);
 
         $this->assertCount(1, $source->find());
-        $this->assertCount(1, $source->findStored());
-        $this->assertCount(1, $source->findStored($snapshotRecord));
+        $this->assertCount(1, $source->findBySnapshotWithSource());
+        $this->assertCount(1, $source->findBySnapshotWithSource($snapshotRecord));
 
         $snapshotRecord = $this->handleSnapshot($snapshot, true);
 
         $this->assertCount(2, $source->find());
-        $this->assertCount(2, $source->findStored());
-        $this->assertCount(2, $source->findStored($snapshotRecord));
+        $this->assertCount(2, $source->findBySnapshotWithSource());
+        $this->assertCount(2, $source->findBySnapshotWithSource($snapshotRecord));
     }
 
     /**

@@ -2,11 +2,13 @@
 
 namespace Spiral\Snapshotter\AggregationHandler\Database\Sources;
 
+use Spiral\Database\Injections\Parameter;
 use Spiral\Debug\SnapshotInterface;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
+use Spiral\Snapshotter\AggregationHandler\Database\Types\IncidentStatus;
 use Spiral\Snapshotter\AggregationHandler\Services\SnapshotService;
 
 class IncidentSource extends RecordSource
@@ -23,18 +25,54 @@ class IncidentSource extends RecordSource
     }
 
     /**
-     * @param SnapshotRecord|null $snapshotRecord
+     * @param SnapshotRecord|null $snapshot
      * @return RecordSelector
      */
-    public function findStored(SnapshotRecord $snapshotRecord = null): RecordSelector
+    public function findBySnapshotWithSource(SnapshotRecord $snapshot = null): RecordSelector
     {
-        $where = ['status' => 'stored'];
+        $where = [
+            'status' => [
+                'IN' => new Parameter([IncidentStatus::LAST, IncidentStatus::STORED])
+            ]
+        ];
 
-        if (!empty($snapshotRecord)) {
-            return $this->findBySnapshot($snapshotRecord)->where($where);
+        if (!empty($snapshot)) {
+            return $this->findBySnapshot($snapshot)->where($where);
         }
 
         return $this->find($where);
+    }
+
+    /**
+     * @param string|int $id
+     * @param array      $load
+     * @return null|IncidentRecord
+     */
+    public function findWithSourceByPK($id, array $load = [])
+    {
+        /** @var IncidentRecord $incident */
+        $incident = $this->findByPK($id, $load);
+        if (empty($incident) || !$incident->getExceptionSource()) {
+            return null;
+        }
+
+        return $incident;
+    }
+
+    /**
+     * @param string|int $id
+     * @param array      $load
+     * @return null|IncidentRecord
+     */
+    public function findStoredByPK($id, array $load = [])
+    {
+        /** @var IncidentRecord $incident */
+        $incident = $this->findByPK($id, $load);
+        if (empty($incident) || !$incident->status->isStored()) {
+            return null;
+        }
+
+        return $incident;
     }
 
     /**
@@ -43,9 +81,71 @@ class IncidentSource extends RecordSource
      */
     public function findBySnapshot(SnapshotRecord $snapshotRecord): RecordSelector
     {
-        $where['exception_hash'] = $snapshotRecord->exception_hash;
+        $where = [
+            'exception_hash' => $snapshotRecord->exception_hash
+        ];
 
         return $this->find($where);
+    }
+
+    /**
+     * @param SnapshotRecord $snapshotRecord
+     * @return RecordSelector
+     */
+    public function findSnapshotHistory(SnapshotRecord $snapshotRecord): RecordSelector
+    {
+        $where = [
+            'exception_hash' => $snapshotRecord->exception_hash,
+            'status'         => [
+                'IN' => new Parameter([
+                    IncidentStatus::STORED,
+                    IncidentStatus::SUPPRESSED
+                ])
+            ]
+        ];
+
+        return $this->find($where);
+    }
+
+    /**
+     * @param SnapshotRecord $snapshotRecord
+     * @param string|int     $id
+     * @param array          $load
+     * @return null|IncidentRecord
+     */
+    public function findStoredBySnapshotByPK(SnapshotRecord $snapshotRecord, $id, array $load = [])
+    {
+        /** @var IncidentRecord $incident */
+        $incident = $this->findByPK($id, $load);
+        if (
+            empty($incident) ||
+            !$incident->status->isStored() ||
+            $incident->getExceptionHash() !== $snapshotRecord->exception_hash
+        ) {
+            return null;
+        }
+
+        return $incident;
+    }
+
+    /**
+     * @param SnapshotRecord $snapshotRecord
+     * @param string|int     $id
+     * @param array          $load
+     * @return null|IncidentRecord
+     */
+    public function findBySnapshotByPK(SnapshotRecord $snapshotRecord, $id, array $load = [])
+    {
+        /** @var IncidentRecord $incident */
+        $incident = $this->findByPK($id, $load);
+        if (
+            empty($incident) ||
+            $incident->getExceptionHash() !== $snapshotRecord->exception_hash
+        ) {
+            return null;
+        }
+
+        return $incident;
     }
 
     /**

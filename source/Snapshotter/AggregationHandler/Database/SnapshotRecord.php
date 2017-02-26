@@ -105,19 +105,36 @@ class SnapshotRecord extends Record
      */
     public function pushIncident(IncidentRecord $incident)
     {
+        $this->archiveLastIncident();
+
+        $this->count_occurred++;
+        $this->last_incident = $incident;
+    }
+
+    /**
+     * Move last incident to history.
+     */
+    public function archiveLastIncident()
+    {
         $lastIncident = $this->getLastIncident();
         if (!empty($lastIncident)) {
-
             if ($this->isSuppressionEnabled()) {
                 //Remove exception trace before archiving
                 $lastIncident->suppress();
+            } else {
+                $lastIncident->status->setStored();
             }
 
             //Move to history
             $this->incidents->add($lastIncident);
         }
+    }
 
-        $this->count_occurred++;
-        $this->last_incident = $incident;
+    /**
+     * Forget last incident.
+     */
+    public function forgetLastIncident()
+    {
+        $this->last_incident = null;
     }
 }

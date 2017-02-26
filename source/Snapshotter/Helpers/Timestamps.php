@@ -3,6 +3,7 @@
 namespace Spiral\Snapshotter\Helpers;
 
 use Carbon\Carbon;
+use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 
 class Timestamps
@@ -41,7 +42,7 @@ class Timestamps
      */
     public function lastOccurred(SnapshotRecord $snapshot, bool $relative = false): string
     {
-        return $this->getTime($snapshot->last_incident->time_created, $relative);
+        return $this->timeIncidentOccurred($snapshot->getLastIncident(), $relative);
     }
 
     /**
@@ -52,5 +53,15 @@ class Timestamps
     public function timeOccurred(SnapshotRecord $snapshot, bool $relative = false): string
     {
         return $this->getTime($snapshot->time_created, $relative);
+    }
+
+    /**
+     * @param IncidentRecord $incident
+     * @param bool           $relative
+     * @return string
+     */
+    public function timeIncidentOccurred(IncidentRecord $incident, bool $relative = false): string
+    {
+        return $this->getTime($incident->time_created, $relative);
     }
 }
