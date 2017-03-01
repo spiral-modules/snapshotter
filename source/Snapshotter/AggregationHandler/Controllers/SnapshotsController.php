@@ -66,7 +66,7 @@ class SnapshotsController extends Controller
      * @param Names           $names
      * @return string
      */
-    public function editAction(
+    public function viewAction(
         $id,
         SnapshotService $service,
         IncidentSource $source,

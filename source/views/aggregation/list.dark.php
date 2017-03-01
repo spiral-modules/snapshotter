@@ -6,15 +6,19 @@
  * @var \Spiral\Snapshotter\Helpers\Names                              $names
  */
 ?>
-<extends:vault:layout title="[[Vault : Snapshots]]" class="wide-content"/>
+<extends:vault:layout title="[[Vault : Snapshots]]"
+                      class="wide-content"/><!--Shared keeper elements-->
+<dark:use bundle="vault:bundle"/>
 
 <define:actions>
-    <?php if ($selector->count()) { ?>
-        <vault:uri target="snapshots:removeAll" icon="delete"
-                   class="btn red waves-effect waves-light">
-            [[Remove all]]
-        </vault:uri>
-    <?php } ?>
+    <vault:guard permission="vault.snapshots.removeAll">
+        <?php if ($selector->count()) { ?>
+            <vault:uri target="snapshots:removeAll" icon="delete"
+                       class="btn red waves-effect waves-light">
+                [[Remove all]]
+            </vault:uri>
+        <?php } ?>
+    </vault:guard>
 </define:actions>
 
 <define:content>
@@ -27,11 +31,13 @@
                         (<?= $timestamps->timeOccurred($lastSnapshot, true) ?>)</p>
                 </div>
                 <div class="col s12 m2 right-align">
-                    <vault:uri target="snapshots:edit" icon="edit"
-                               class="btn teal waves-effect waves-light"
-                               options="<?= ['id' => $lastSnapshot->primaryKey()] ?>">
-                        [[View last]]
-                    </vault:uri>
+                    <vault:guard permission="vault.snapshots.view">
+                        <vault:uri target="snapshots:view" icon="edit"
+                                   class="btn teal waves-effect waves-light"
+                                   options="<?= ['id' => $lastSnapshot->primaryKey()] ?>">
+                            [[View last]]
+                        </vault:uri>
+                    </vault:guard>
                 </div>
             </div>
         </vault:card>
@@ -83,14 +89,18 @@
         </grid:cell>
 
         <grid:cell style="text-align:right">
-            <vault:uri target="snapshots:edit" icon="edit"
-                       options="<?= ['id' => $entity->primaryKey()] ?>"
-                       class="btn-flat waves-effect"/>
+            <vault:guard permission="vault.snapshots.view">
+                <vault:uri target="snapshots:view" icon="edit"
+                           options="<?= ['id' => $entity->primaryKey()] ?>"
+                           class="btn-flat waves-effect"/>
+            </vault:guard>
         </grid:cell>
         <grid:cell style="text-align:right">
-            <vault:uri target="snapshots:remove" icon="delete"
-                       class="btn red waves-effect waves-light"
-                       options="<?= ['id' => $entity->primaryKey()] ?>"/>
+            <vault:guard permission="vault.snapshots.remove">
+                <vault:uri target="snapshots:remove" icon="delete"
+                           class="btn red waves-effect waves-light"
+                           options="<?= ['id' => $entity->primaryKey()] ?>"/>
+            </vault:guard>
         </grid:cell>
     </vault:grid>
 </define:content>

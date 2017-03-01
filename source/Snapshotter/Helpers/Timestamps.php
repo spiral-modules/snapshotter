@@ -8,13 +8,12 @@ use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 
 class Timestamps
 {
-
     /**
      * @param mixed $timestamp
      * @param bool  $relative
      * @return string
      */
-    private function getTime($timestamp, bool $relative = false): string
+    public function getTime($timestamp, bool $relative = false): string
     {
         if (empty($relative)) {
             return $timestamp;
