@@ -41,7 +41,7 @@ class Timestamps
      */
     public function lastOccurred(SnapshotRecord $snapshot, bool $relative = false): string
     {
-        return $this->timeIncidentOccurred($snapshot->getLastIncident(), $relative);
+        return $this->getTime($snapshot->getLastIncident()->time_created, $relative);
     }
 
     /**

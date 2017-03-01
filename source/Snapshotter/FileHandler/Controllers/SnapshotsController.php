@@ -3,15 +3,13 @@
 namespace Spiral\Snapshotter\FileHandler\Controllers;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Spiral\Core\Controller;
-use Spiral\Core\Traits\AuthorizesTrait;
 use Spiral\Http\Exceptions\ClientExceptions\NotFoundException;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\Response\ResponseWrapper;
+use Spiral\Snapshotter\AbstractController;
 use Spiral\Snapshotter\FileHandler\Services\SnapshotService;
 use Spiral\Snapshotter\Helpers\Names;
 use Spiral\Snapshotter\Helpers\Timestamps;
-use Spiral\Translator\Traits\TranslatorTrait;
 
 use Spiral\Vault\Vault;
 use Spiral\Views\ViewManager;
@@ -22,12 +20,8 @@ use Spiral\Views\ViewManager;
  * @property Vault           $vault
  * @property ResponseWrapper $response
  */
-class SnapshotsController extends Controller
+class SnapshotsController extends AbstractController
 {
-    use AuthorizesTrait, TranslatorTrait;
-
-    const GUARD_NAMESPACE = 'vault.snapshots';
-
     /**
      * List of snapshots.
      *
@@ -40,7 +34,7 @@ class SnapshotsController extends Controller
     {
         $snapshots = $service->getSnapshots();
 
-        return $this->views->render('snapshotter:file/snapshot', [
+        return $this->views->render('snapshotter:file/list', [
             'selector'   => $snapshots,
             'timestamps' => $timestamps,
             'names'      => $names
@@ -50,35 +44,39 @@ class SnapshotsController extends Controller
     /**
      * View snapshot.
      *
-     * @param string          $id
      * @param SnapshotService $service
+     * @param Timestamps      $timestamps
      * @return string
      */
-    public function viewAction($id, SnapshotService $service)
+    public function viewAction(SnapshotService $service, Timestamps $timestamps)
     {
-        $snapshot = $id;
-        if (!$service->exists($snapshot)) {
+        $filename = $this->input->input('filename');
+        $snapshot = $service->getSnapshot($filename);
+
+        if (empty($snapshot)) {
             throw new NotFoundException;
         }
 
         $this->authorize('view', compact('snapshot'));
 
         return $this->views->render('snapshotter:file/snapshot', [
-            'snapshot' => $snapshot
+            'snapshot'   => $snapshot,
+            'timestamps' => $timestamps,
         ]);
     }
 
     /**
      * View last snapshot incident source.
      *
-     * @param string          $id
      * @param SnapshotService $service
      * @return string
      */
-    public function iframeAction($id, SnapshotService $service)
+    public function iframeAction(SnapshotService $service)
     {
-        $snapshot = $id;
-        if (!$service->exists($snapshot)) {
+        $filename = $this->input->input('filename');
+        $snapshot = $service->getSnapshot($filename);
+
+        if (empty($snapshot)) {
             throw new NotFoundException;
         }
 
@@ -115,15 +113,16 @@ class SnapshotsController extends Controller
     /**
      * Remove single snapshot with all incident records.
      *
-     * @param string                 $id
      * @param SnapshotService        $service
      * @param ServerRequestInterface $request
      * @return array|\Psr\Http\Message\ResponseInterface
      */
-    public function removeAction($id, SnapshotService $service, ServerRequestInterface $request)
+    public function removeAction(SnapshotService $service, ServerRequestInterface $request)
     {
-        $snapshot = $id;
-        if (!$service->exists($snapshot)) {
+        $filename = $this->input->input('filename');
+        $snapshot = $service->getSnapshot($filename);
+
+        if (empty($snapshot)) {
             throw new NotFoundException;
         }
 

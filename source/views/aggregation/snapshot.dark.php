@@ -37,7 +37,7 @@
             <vault:uri target="snapshots:remove" icon="delete"
                        class="btn red waves-effect waves-light"
                        options="<?= ['id' => $snapshot->primaryKey(), 'backToList' => 1] ?>">
-                [[Remove all]]
+                [[Remove]]
             </vault:uri>
         <?php } ?>
     </vault:guard>

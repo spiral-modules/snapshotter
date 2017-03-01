@@ -3,12 +3,11 @@
 namespace Spiral\Snapshotter\AggregationHandler\Controllers;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Spiral\Core\Controller;
-use Spiral\Core\Traits\AuthorizesTrait;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Http\Exceptions\ClientExceptions\NotFoundException;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\Response\ResponseWrapper;
+use Spiral\Snapshotter\AbstractController;
 use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\IncidentSource;
@@ -16,7 +15,6 @@ use Spiral\Snapshotter\AggregationHandler\Database\Sources\SnapshotSource;
 use Spiral\Snapshotter\AggregationHandler\Services\SnapshotService;
 use Spiral\Snapshotter\Helpers\Names;
 use Spiral\Snapshotter\Helpers\Timestamps;
-use Spiral\Translator\Traits\TranslatorTrait;
 
 use Spiral\Vault\Vault;
 use Spiral\Views\ViewManager;
@@ -27,12 +25,8 @@ use Spiral\Views\ViewManager;
  * @property Vault           $vault
  * @property ResponseWrapper $response
  */
-class SnapshotsController extends Controller
+class SnapshotsController extends AbstractController
 {
-    use AuthorizesTrait, TranslatorTrait;
-
-    const GUARD_NAMESPACE = 'vault.snapshots';
-
     /**
      * List of snapshots.
      *

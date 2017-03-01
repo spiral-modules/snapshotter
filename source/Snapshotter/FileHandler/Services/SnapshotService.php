@@ -5,7 +5,7 @@ namespace Spiral\Snapshotter\FileHandler\Services;
 use Spiral\Core\Service;
 use Spiral\Debug\Configs\SnapshotConfig;
 use Spiral\Files\FileManager;
-use Spiral\Snapshotter\FileHandler\Entities\Snapshot;
+use Spiral\Snapshotter\FileHandler\Entities\FileSnapshot;
 
 class SnapshotService extends Service
 {
@@ -38,13 +38,26 @@ class SnapshotService extends Service
         $snapshots = [];
 
         foreach ($this->files->getFiles($this->config->reportingDirectory(), '*.html') as $file) {
-            $snapshots[] = new Snapshot($file, $this->files);
+            $snapshots[] = new FileSnapshot($file);
             $order[] = $this->files->time($file);
         }
 
         array_multisort($order, SORT_DESC, $snapshots);
 
         return $snapshots;
+    }
+
+    /**
+     * @param string $filename
+     * @return null|FileSnapshot
+     */
+    public function getSnapshot(string $filename)
+    {
+        if (!$this->exists($filename)) {
+            return null;
+        }
+
+        return new FileSnapshot($this->config->reportingDirectory() . $filename);
     }
 
     /**
@@ -58,11 +71,11 @@ class SnapshotService extends Service
     }
 
     /**
-     * @param string $filename
+     * @param FileSnapshot $filename
      */
-    public function deleteSnapshot(string $filename)
+    public function deleteSnapshot(FileSnapshot $filename)
     {
-        $this->files->delete($this->config->reportingDirectory() . $filename);
+        $this->files->delete($filename->path());
     }
 
     /**
@@ -75,11 +88,11 @@ class SnapshotService extends Service
     }
 
     /**
-     * @param string $filename
+     * @param FileSnapshot $snapshot
      * @return string
      */
-    public function read(string $filename): string
+    public function read(FileSnapshot $snapshot): string
     {
-        return $this->files->read($this->config->reportingDirectory() . $filename);
+        return $this->files->read($snapshot->path());
     }
 }

@@ -43,7 +43,7 @@ class SnapshotterModule implements ModuleInterface
 
         //Register controller in navigation config
         $registrator->configure('modules/vault', 'controllers', 'spiral/snapshotter', [
-            "'snapshots' => \\Spiral\\Snapshotter\\AggregationHandler\\Controllers\\SnapshotsController::class,",
+            "'snapshots' => \\Spiral\\Snapshotter\\AbstractController::class,",
         ]);
 
         //Register menu item in navigation config
