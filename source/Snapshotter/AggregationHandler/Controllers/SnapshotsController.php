@@ -170,7 +170,7 @@ class SnapshotsController extends AbstractController
      * @param string|int             $id
      * @param SnapshotService        $service
      * @param ServerRequestInterface $request
-     * @return array
+     * @return array|\Psr\Http\Message\ResponseInterface
      */
     public function removeAction(
         $id,
@@ -224,7 +224,7 @@ class SnapshotsController extends AbstractController
      * @param string|int     $id
      * @param IncidentSource $incidentSource
      * @param SnapshotSource $snapshotSource
-     * @return \Psr\Http\Message\ResponseInterface
+     * @return array|\Psr\Http\Message\ResponseInterface
      */
     public function suppressIncidentAction(
         $id,
@@ -341,7 +341,7 @@ class SnapshotsController extends AbstractController
      * @param string|int     $id
      * @param IncidentSource $incidentSource
      * @param SnapshotSource $snapshotSource
-     * @return array
+     * @return array|\Psr\Http\Message\ResponseInterface
      */
     public function removeIncidentAction(
         $id,
