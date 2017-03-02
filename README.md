@@ -4,6 +4,8 @@ Snapshots management module. Can store snapshot in database or in files, allows 
 [![Latest Stable Version](https://poser.pugx.org/spiral/snapshotter/v/stable)](https://packagist.org/packages/spiral/snapshotter) 
 [![Total Downloads](https://poser.pugx.org/spiral/snapshotter/downloads)](https://packagist.org/packages/spiral/snapshotter) 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiral-modules/snapshotter/badges/quality-score.png)](https://scrutinizer-ci.com/g/spiral-modules/snapshotter/) 
+[![Coverage Status](https://coveralls.io/repos/github/spiral-modules/snapshotter/badge.svg?branch=feature%2F1.0.0)](https://coveralls.io/github/spiral-modules/snapshotter?branch=feature%2F1.0.0)
+[![Build Status](https://travis-ci.org/spiral-modules/snapshotter.svg?branch=master)](https://travis-ci.org/spiral-modules/snapshotter)
 
 ## Installation
 ```
