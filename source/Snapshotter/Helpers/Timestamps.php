@@ -3,8 +3,6 @@
 namespace Spiral\Snapshotter\Helpers;
 
 use Carbon\Carbon;
-use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
-use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 
 class Timestamps
 {
