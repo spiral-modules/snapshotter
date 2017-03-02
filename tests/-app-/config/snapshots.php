@@ -19,7 +19,7 @@ return [
      */
     'reporting' => [
         'enabled'      => true,
-        'maxSnapshots' => 20,
+        'maxSnapshots' => 5,
         'directory'    => directory('runtime') . 'snapshots',
         'filename'     => '{date}-{name}.html',
         'dateFormat'   => 'd.m.Y-Hi.s',
