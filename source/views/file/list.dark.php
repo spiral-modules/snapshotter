@@ -3,7 +3,6 @@
  * @var array                                                 $selector
  * @var \Spiral\Snapshotter\FileHandler\Entities\FileSnapshot $entity
  * @var \Spiral\Snapshotter\Helpers\Timestamps                $timestamps
- * @var \Spiral\Snapshotter\Helpers\Names                     $names
  */
 ?>
 <extends:vault:layout title="[[Vault : Snapshots]]" class="wide-content"/>
@@ -32,7 +31,7 @@
 
         <grid:cell label="[[File:]]">
             <span title="<?= e($entity->path()) ?>">
-                <?= e(\Spiral\Support\Strings::shorter($names->onlyName($entity->path()), 100)) ?>
+                <?= e(\Spiral\Support\Strings::shorter($entity->id(), 100)) ?>
             </span>
         </grid:cell>
 

@@ -8,9 +8,7 @@ use Spiral\Http\Request\InputManager;
 use Spiral\Http\Response\ResponseWrapper;
 use Spiral\Snapshotter\AbstractController;
 use Spiral\Snapshotter\FileHandler\Services\SnapshotService;
-use Spiral\Snapshotter\Helpers\Names;
 use Spiral\Snapshotter\Helpers\Timestamps;
-
 use Spiral\Vault\Vault;
 use Spiral\Views\ViewManager;
 
@@ -27,17 +25,15 @@ class SnapshotsController extends AbstractController
      *
      * @param SnapshotService $service
      * @param Timestamps      $timestamps
-     * @param Names           $names
      * @return string
      */
-    public function indexAction(SnapshotService $service, Timestamps $timestamps, Names $names)
+    public function indexAction(SnapshotService $service, Timestamps $timestamps)
     {
         $snapshots = $service->getSnapshots();
 
         return $this->views->render('snapshotter:file/list', [
             'selector'   => $snapshots,
-            'timestamps' => $timestamps,
-            'names'      => $names
+            'timestamps' => $timestamps
         ]);
     }
 
