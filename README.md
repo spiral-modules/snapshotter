@@ -1,25 +1,18 @@
 # Snapshotter
-Snapshots management module. Snapshot files are now stored in database, this allows to view and easily manipulate them. 
+Snapshots management module. Can store snapshot in database or in files, allows to view and easily manipulate them via vault panel. 
 
 [![Latest Stable Version](https://poser.pugx.org/spiral/snapshotter/v/stable)](https://packagist.org/packages/spiral/snapshotter) 
 [![Total Downloads](https://poser.pugx.org/spiral/snapshotter/downloads)](https://packagist.org/packages/spiral/snapshotter) 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiral-modules/snapshotter/badges/quality-score.png)](https://scrutinizer-ci.com/g/spiral-modules/snapshotter/) 
+[![Coverage Status](https://coveralls.io/repos/github/spiral-modules/snapshotter/badge.svg?branch=feature%2F1.0.0)](https://coveralls.io/github/spiral-modules/snapshotter?branch=feature%2F1.0.0)
+[![Build Status](https://travis-ci.org/spiral-modules/snapshotter.svg?branch=master)](https://travis-ci.org/spiral-modules/snapshotter)
 
 ## Installation
 ```
 composer require spiral/snapshotter
 spiral register spiral/snapshotter
 ```
-
-After installation you only need to do next steps:
-
-### Binding SnaphotInterface to AggregatedSnapshot
-
-```php
-$this->container->bind(SnapshotInterface::class, Snapshotter\Debug\AggregatedSnapshot::class);
-```
-
-### Include snapshots link into navigation menu (optional)
+### Include snapshots controller link into navigation menu (optional)
 
 Be sure that you have `navigation.vault` placeholder in `modules/vault` config like this
 ```php
@@ -32,51 +25,59 @@ Be sure that you have `navigation.vault` placeholder in `modules/vault` config l
 ]
 ```
 
-### Define database connection.
-Snapshotter is an addition to the vault module, so it uses database `vault`
+### Select one of provided handlers
 
----
-
-### Using PHP version < 7? 
-
-Create your own inherited class for `SnapshotService` with `createFromException` method overriding and replace `$exception` type with `\Exception` instead of `\Throwable`
-
+Currently there are two supported handlers: `FileHandler` and `AggregationHandler`, choose onf of them and bind it:
 ```php
-class LegacySnapshotService extends SnapshotService
+$this->getBootloader()->bootload([
+    \Spiral\Snapshotter\Bootloaders\FileSnapshotterBootloader::class
+]);
+//OR:
+$this->getBootloader()->bootload([
+    \Spiral\Snapshotter\Bootloaders\AggregationSnapshotterBootloader::class
+]);
+```
+
+## File Handler
+File handler stores snapshot files in runtime directory. All you need to do is add `FileSnapshotterBootloader` bootloader.
+
+You can remove standard `SnapshotInterface` binding:
+```php
+$this->container->bind(SnapshotInterface::class, Snapshotter\Debug\AggregatedSnapshot::class);
+```
+Don't worry, it is placed in the bootloader already:
+```php
+class FileSnapshotterBootloader extends Bootloader
 {
     /**
-     * @param \Exception $exception
-     * @param string     $filename
-     * @param string     $teaser
-     * @param string     $hash
-     * @return Snapshot
+     * {@inheritdoc}
      */
-    public function createFromException(\Exception $exception, $filename, $teaser, $hash)
-    {
-        $fields = [
-            'exception_hash'      => $hash,
-            'filename'            => $filename,
-            'exception_teaser'    => $teaser,
-            'exception_classname' => get_class($exception),
-            'exception_message'   => $exception->getMessage(),
-            'exception_line'      => $exception->getLine(),
-            'exception_file'      => $exception->getFile(),
-            'exception_code'      => $exception->getCode(),
-        ];
-
-        return $this->getSource()->create($fields);
-    }
+    const BINDINGS = [
+        HandlerInterface::class        => FileHandler::class,
+        AbstractController::class      => SnapshotsController::class,
+        Debug\SnapshotInterface::class => Debug\Snapshot::class
+    ];
 }
 ```
- 
-After that bind your new class before binding `Debug\SnapshotInterface::class`
 
+## Aggregation Handler
+Aggregation handler stores snapshots in database. All you need to do is add `AggregationSnapshotterBootloader` bootloader.
+
+### Suppression
+
+Aggregation handler aggregates similar snapshot incidents groping them by snapshot teaser message, it allows you to easily manage snapshots if some of them occurred more than once.
+Aggregation handler supports suppression feature: it allows you to save space because new snapshot incidents will be stored with empty exception source. You will see all incidents, no reason to store all sources if you can find it in the last incident. If you want to store sources - just disable suppression.
+> After suppression is enabled, only new incidents will be involved, old ones will be kept untouched. Same for disabled suppression.
+
+### Define database connection.
+
+Aggregation handler uses database, by default it is set to `runtime` database:
 ```php
-if (version_compare(PHP_VERSION, '7.0') < 0) {
-    $this->container->bind(Snapshotter\Models\SnapshotService::class, \LegacySnapshotService::class);
-} else {
-    $this->container->bind(Debug\SnapshotInterface::class, Snapshotter\Debug\AggregatedSnapshot::class);
-}
+'snapshots' => [
+   'connection'  => 'runtime',
+   'tablePrefix' => 'snapshots_'
+   /*{{databases.snapshotter}}*/
+],
 ```
 
 ---
@@ -84,4 +85,3 @@ if (version_compare(PHP_VERSION, '7.0') < 0) {
 #TODO-list
 1. Add charts/widgets
 2. Add listing dependency
-3. Tests

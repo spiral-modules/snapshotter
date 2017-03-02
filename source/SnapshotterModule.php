@@ -21,7 +21,7 @@ class SnapshotterModule implements ModuleInterface
     {
         //Register tokenizer directory
         $registrator->configure('tokenizer', 'directories', 'spiral/snapshotter', [
-            "directory('libraries') . 'spiral/snapshotter',",
+            "directory('libraries') . 'spiral/snapshotter/source/Snapshotter/',",
         ]);
 
         //Register view namespace
@@ -29,21 +29,21 @@ class SnapshotterModule implements ModuleInterface
             "'snapshotter' => [",
             "   directory('libraries') . 'spiral/snapshotter/source/views/',",
             "   /*{{namespaces.snapshotter}}*/",
-            "]"
+            "],"
         ]);
 
         //Register database settings
         $registrator->configure('databases', 'databases', 'spiral/snapshotter', [
-            "'vault' => [",
-            "   'connection'  => 'vault',",
-            "   'tablePrefix' => 'vault_'",
+            "'snapshotter' => [",
+            "   'connection'  => 'runtime',",
+            "   'tablePrefix' => 'snapshots_'",
             "   /*{{databases.snapshotter}}*/",
-            "]",
+            "],",
         ]);
 
         //Register controller in navigation config
         $registrator->configure('modules/vault', 'controllers', 'spiral/snapshotter', [
-            "'snapshots' => \\Spiral\\Snapshotter\\Controllers\\SnapshotsController::class",
+            "'snapshots' => \\Spiral\\Snapshotter\\AbstractController::class,",
         ]);
 
         //Register menu item in navigation config
