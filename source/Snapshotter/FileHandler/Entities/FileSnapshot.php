@@ -34,6 +34,14 @@ class FileSnapshot
     }
 
     /**
+     * @return int
+     */
+    public function size(): int
+    {
+        return filesize($this->filename);
+    }
+
+    /**
      * @return FileTimestamp
      */
     public function timestamp(): FileTimestamp

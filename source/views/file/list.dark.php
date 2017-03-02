@@ -35,6 +35,10 @@
             </span>
         </grid:cell>
 
+        <grid:cell label="[[Size:]]">
+            <?= e(\Spiral\Support\Strings::bytes($entity->size())) ?>
+        </grid:cell>
+
         <grid:cell style="text-align:right">
             <vault:guard permission="vault.snapshots.view">
                 <vault:uri target="snapshots:view" icon="edit"
