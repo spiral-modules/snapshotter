@@ -7,7 +7,7 @@ use Spiral\Debug\SnapshotInterface;
 interface HandlerInterface
 {
     /**
-     * @param SnapshotInterface $snapshotInterface
+     * @param SnapshotInterface $snapshot
      */
-    public function registerSnapshot(SnapshotInterface $snapshotInterface);
+    public function registerSnapshot(SnapshotInterface $snapshot);
 }

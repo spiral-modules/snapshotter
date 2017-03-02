@@ -11,5 +11,4 @@ abstract class AbstractController extends Controller
     use AuthorizesTrait, TranslatorTrait;
 
     const GUARD_NAMESPACE = 'vault.snapshots';
-
 }

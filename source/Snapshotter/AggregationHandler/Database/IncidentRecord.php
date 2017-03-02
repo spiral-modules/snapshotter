@@ -162,18 +162,4 @@ class IncidentRecord extends Record
     {
         return $this->exception_file;
     }
-
-    /**
-     * Get snapshot record related to this incident.
-     *
-     * @return SnapshotRecord
-     */
-    public function getSnapshot(): SnapshotRecord
-    {
-        if ($this->status->isLast()) {
-            return $this->snapshot;
-        }
-
-        return $this->parent_snapshot;
-    }
 }

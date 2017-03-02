@@ -2,13 +2,11 @@
 
 namespace Spiral\Tests\Snapshotter\AggregationHandler\Services;
 
-use Spiral\Models\Accessors\SqlTimestamp;
-use Spiral\ORM\Transaction;
-use Spiral\ORM\TransactionInterface;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\IncidentSource;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\SnapshotSource;
+use Spiral\Snapshotter\AggregationHandler\Database\Types\IncidentStatus;
 use Spiral\Snapshotter\AggregationHandler\Services\SnapshotService;
 use Spiral\Tests\BaseTest;
 
@@ -33,22 +31,19 @@ class SnapshotServiceTest extends BaseTest
         /** @var SnapshotService $service */
         $service = $this->container->get(SnapshotService::class);
 
-        $count = $this->orm->source(SnapshotRecord::class)->find()->count();
-        $this->assertEquals(0, $count);
+        $this->assertCount(0, $this->orm->source(SnapshotRecord::class)->find());
 
         $hash = 'some hash';
         $snapshot = $service->getByHash($hash);
         $snapshot->save();
 
-        $count = $this->orm->source(SnapshotRecord::class)->find()->count();
-        $this->assertEquals(1, $count);
+        $this->assertCount(1, $this->orm->source(SnapshotRecord::class)->find());
 
         $hash2 = 'some hash2';
         $snapshot = $service->getByHash($hash2);
         $snapshot->save();
 
-        $count = $this->orm->source(SnapshotRecord::class)->find()->count();
-        $this->assertEquals(2, $count);
+        $this->assertCount(2, $this->orm->source(SnapshotRecord::class)->find());
     }
 
     /**
@@ -125,26 +120,44 @@ class SnapshotServiceTest extends BaseTest
     }
 
     /**
-     * Test linking snapshot and aggregation
+     * Test delete operation.
      */
-//    public function testAddSnapshot()
-//    {
-//        /** @var AggregationService $service */
-//        $service = $this->container->get(AggregationService::class);
-//
-//        /** @var SnapshotRecord $aggregation */
-//        $aggregation = new SnapshotRecord();
-//        $snapshot = new IncidentRecord();
-//
-//        $aggregation->save();
-//        $snapshot->save();
-//
-//        $service->addSnapshot($aggregation, $snapshot);
-//
-//        $aggregation->save();
-//        $snapshot->save();
-//
-//        $this->assertEquals($aggregation->primaryKey(), $snapshot->aggregation_id);
-//        $this->assertEquals($snapshot, $aggregation->last_incident);
-//    }
+    public function testDelete()
+    {
+        /** @var SnapshotService $service */
+        $service = $this->container->get(SnapshotService::class);
+        /** @var SnapshotSource $source */
+        $source = $this->container->get(SnapshotSource::class);
+
+        /** @var IncidentSource $incidentSource */
+        $incidentSource = $this->container->get(IncidentSource::class);
+
+        $snapshot = $this->makeSnapshot('custom error', 777);
+        $snapshotRecord = $this->handleSnapshot($snapshot, true);
+
+        $this->assertCount(1, $source->findWithLast());
+        $this->assertNotEmpty($snapshotRecord->getLastIncident());
+        $this->assertCount(0, $snapshotRecord->getIncidentsHistory());
+        $this->assertCount(1, $incidentSource);
+        $this->assertCount(1, $incidentSource->find(['status' => IncidentStatus::LAST]));
+
+        $service->delete($snapshotRecord);
+
+        /** @var SnapshotRecord $snapshotRecord */
+        $snapshotRecord = $source->findOne();
+        $this->assertNotEmpty($snapshotRecord);
+
+        $this->assertCount(0, $source->findWithLast());
+        $this->assertEmpty($snapshotRecord->getLastIncident());
+        $this->assertCount(1, $snapshotRecord->getIncidentsHistory());
+        $this->assertCount(1, $incidentSource);
+        $this->assertCount(1, $incidentSource->find(['status' => IncidentStatus::DELETED]));
+
+        /** @var IncidentRecord $incident */
+        $incident = iterator_to_array($snapshotRecord->getIncidentsHistory())[0];
+
+        $this->assertNotEmpty($incident);
+        $this->assertEmpty($incident->getExceptionSource());
+        $this->assertTrue($incident->status->isDeleted());
+    }
 }

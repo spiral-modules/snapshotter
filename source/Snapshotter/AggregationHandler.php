@@ -32,16 +32,16 @@ class AggregationHandler extends Service implements HandlerInterface
     /**
      * Create snapshot aggregation and aggregated snapshot and tie them together.
      *
-     * @param SnapshotInterface $snapshotInterface
+     * @param SnapshotInterface $snapshot
      */
-    public function registerSnapshot(SnapshotInterface $snapshotInterface)
+    public function registerSnapshot(SnapshotInterface $snapshot)
     {
         /** @var IncidentRecord $incident */
-        $incident = $this->source->createFromSnapshot($snapshotInterface);
+        $incident = $this->source->createFromSnapshot($snapshot);
 
-        /** @var SnapshotRecord $snapshot */
-        $snapshot = $this->service->getByHash($this->service->makeHash($snapshotInterface));
-        $snapshot->pushIncident($incident);
-        $snapshot->save();
+        /** @var SnapshotRecord $snapshotRecord */
+        $snapshotRecord = $this->service->getByHash($this->service->makeHash($snapshot));
+        $snapshotRecord->pushIncident($incident);
+        $snapshotRecord->save();
     }
 }

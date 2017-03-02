@@ -37,6 +37,10 @@ class SnapshotService extends Service
         $order = [];
         $snapshots = [];
 
+        if (!$this->files->exists($this->config->reportingDirectory())) {
+            return [];
+        }
+
         foreach ($this->files->getFiles($this->config->reportingDirectory(), '*.html') as $file) {
             $snapshots[] = new FileSnapshot($file);
             $order[] = $this->files->time($file);

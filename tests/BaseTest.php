@@ -10,9 +10,11 @@ use Psr\Log\LogLevel;
 use Spiral\Core\Traits\SharedTrait;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Debug\Snapshot;
+use Spiral\Snapshotter\Bootloaders\FileSnapshotterBootloader;
 use Spiral\Snapshotter\DelegateSnapshot;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 use Spiral\Snapshotter\AggregationHandler;
+use Spiral\Snapshotter\FileHandler;
 
 /**
  * @property \Spiral\Core\MemoryInterface             $memory
@@ -174,5 +176,23 @@ abstract class BaseTest extends TestCase
             [],
             ['id' => SelectQuery::SORT_DESC]
         );
+    }
+
+    /**
+     * @param Snapshot $snapshot
+     * @param bool     $report
+     */
+    protected function handleFileSnapshot(Snapshot $snapshot, bool $report = true)
+    {
+        $this->app->getBootloader()->bootload([FileSnapshotterBootloader::class]);
+
+        /** @var DelegateSnapshot $delegate */
+        $delegate = $this->factory->make(DelegateSnapshot::class, [
+            'exception' => $snapshot->getException()
+        ]);
+
+        if ($report) {
+            $delegate->report();
+        }
     }
 }

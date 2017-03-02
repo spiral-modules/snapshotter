@@ -296,7 +296,10 @@ class SnapshotsController extends AbstractController
 
         $this->authorize('view', compact('snapshot'));
 
-        return $this->views->render('snapshotter:aggregation/incident', compact('incident'));
+        return $this->views->render(
+            'snapshotter:aggregation/incident',
+            compact('incident', 'snapshot')
+        );
     }
 
     /**

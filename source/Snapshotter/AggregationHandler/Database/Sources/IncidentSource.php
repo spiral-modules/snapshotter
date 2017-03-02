@@ -16,15 +16,6 @@ class IncidentSource extends RecordSource
     const RECORD = IncidentRecord::class;
 
     /**
-     * @param IncidentRecord $incident
-     */
-    public function delete(IncidentRecord $incident)
-    {
-        $incident->status->setDeleted();
-        $incident->save();
-    }
-
-    /**
      * @param SnapshotRecord|null $snapshot
      * @return RecordSelector
      */
@@ -41,38 +32,6 @@ class IncidentSource extends RecordSource
         }
 
         return $this->find($where);
-    }
-
-    /**
-     * @param string|int $id
-     * @param array      $load
-     * @return null|IncidentRecord
-     */
-    public function findWithSourceByPK($id, array $load = [])
-    {
-        /** @var IncidentRecord $incident */
-        $incident = $this->findByPK($id, $load);
-        if (empty($incident) || !$incident->getExceptionSource()) {
-            return null;
-        }
-
-        return $incident;
-    }
-
-    /**
-     * @param string|int $id
-     * @param array      $load
-     * @return null|IncidentRecord
-     */
-    public function findStoredByPK($id, array $load = [])
-    {
-        /** @var IncidentRecord $incident */
-        $incident = $this->findByPK($id, $load);
-        if (empty($incident) || !$incident->status->isStored()) {
-            return null;
-        }
-
-        return $incident;
     }
 
     /**

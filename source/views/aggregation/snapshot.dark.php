@@ -66,17 +66,22 @@
                         <dl>
                             <dt>[[First occurrence:]]</dt>
                             <dd>
-                                <?= $timestamps->firstOccurred($snapshot) ?>
+                                <?= $timestamps->getTime($snapshot->time_created) ?>
                                 <span class="grey-text">
-                                    (<?= $timestamps->firstOccurred($snapshot, true) ?>)
+                                    (<?= $timestamps->getTime($snapshot->time_created, true) ?>)
                                 </span>
                             </dd>
                             <dt>[[Last occurrence:]]</dt>
                             <?php if ($snapshot->count_occurred > 1) { ?>
                                 <dd>
-                                    <?= $timestamps->firstOccurred($snapshot) ?>
+                                    <?= $timestamps->getTime(
+                                        $snapshot->getLastIncident()->time_created
+                                    ) ?>
                                     <span class="grey-text">
-                                        (<?= $timestamps->lastOccurred($snapshot, true) ?>)
+                                        (<?= $timestamps->getTime(
+                                            $snapshot->getLastIncident()->time_created,
+                                            true
+                                        ) ?>)
                                     </span>
                                 </dd>
                             <?php } ?>
@@ -137,9 +142,10 @@
                     <grid:cell label="[[ID:]]" value="<?= $entity->primaryKey() ?>"/>
 
                     <grid:cell label="[[Occurred:]]">
-                        <?= $timestamps->timeIncidentOccurred($entity) ?>
-                        <span class="grey-text">(<?= $timestamps->timeIncidentOccurred($entity,
-                                true) ?>)</span>
+                        <?= $timestamps->getTime($entity->time_created) ?>
+                        <span class="grey-text">
+                            (<?= $timestamps->getTime($entity->time_created, true) ?>)
+                        </span>
                     </grid:cell>
 
                     <grid:cell label="[[Status:]]" value="<?= e($entity->status) ?>"/>
@@ -148,9 +154,9 @@
                     <grid:cell style="text-align:right">
                         <?php if ($entity->status->isStored()) { ?>
                             <vault:guard permission="vault.snapshots.view">
-                                <vault:uri target="snapshots:view" icon="edit"
+                                <vault:uri target="snapshots:incident" icon="edit"
                                            class="btn-flat waves-effect" options="<?= [
-                                    'id'       => $entity->primaryKey(),
+                                    'id'       => $snapshot->primaryKey(),
                                     'incident' => $entity->primaryKey(),
                                 ] ?>"/>
                             </vault:guard>
@@ -168,7 +174,7 @@
                             <vault:guard permission="vault.snapshots.edit">
                                 <vault:uri target="snapshots:removeIncident" icon="delete"
                                            class="btn red waves-effect waves-light" options="<?= [
-                                    'id'       => $entity->primaryKey(),
+                                    'id'       => $snapshot->primaryKey(),
                                     'incident' => $entity->primaryKey(),
                                 ] ?>">
                                     [[Remove]]

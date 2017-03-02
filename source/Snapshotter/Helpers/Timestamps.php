@@ -23,44 +23,4 @@ class Timestamps
 
         return $carbon->diffForHumans($carbon->now());
     }
-
-    /**
-     * @param SnapshotRecord $snapshot
-     * @param bool           $relative
-     * @return string
-     */
-    public function firstOccurred(SnapshotRecord $snapshot, bool $relative = false): string
-    {
-        return $this->getTime($snapshot->time_created, $relative);
-    }
-
-    /**
-     * @param SnapshotRecord $snapshot
-     * @param bool           $relative
-     * @return string
-     */
-    public function lastOccurred(SnapshotRecord $snapshot, bool $relative = false): string
-    {
-        return $this->getTime($snapshot->getLastIncident()->time_created, $relative);
-    }
-
-    /**
-     * @param SnapshotRecord $snapshot
-     * @param bool           $relative
-     * @return string
-     */
-    public function timeOccurred(SnapshotRecord $snapshot, bool $relative = false): string
-    {
-        return $this->getTime($snapshot->time_created, $relative);
-    }
-
-    /**
-     * @param IncidentRecord $incident
-     * @param bool           $relative
-     * @return string
-     */
-    public function timeIncidentOccurred(IncidentRecord $incident, bool $relative = false): string
-    {
-        return $this->getTime($incident->time_created, $relative);
-    }
 }

@@ -58,6 +58,109 @@ class IncidentSourceTest extends BaseTest
         $this->assertCount(2, $source->findBySnapshotWithSource($snapshotRecord));
     }
 
+    public function testFindSnapshotHistory()
+    {
+        $snapshot = $this->makeSnapshot('custom error', 777);
+
+        /** @var IncidentSource $source */
+        $source = $this->container->get(IncidentSource::class);
+
+        $snapshotRecord = $this->handleSnapshot($snapshot, true);
+        $this->assertCount(0, $source->findSnapshotHistory($snapshotRecord));
+
+        $snapshotRecord = $this->handleSnapshot($snapshot, true);
+        $this->assertCount(1, $source->findSnapshotHistory($snapshotRecord));
+
+        /** @var IncidentRecord $incident */
+        $incident = $source->find()->orderBy('time_created', 'ASC')->findOne();
+        $this->assertNotEmpty($incident);
+
+        $incident->status->setDeleted();
+        $incident->save();
+
+        $this->assertCount(0, $source->findSnapshotHistory($snapshotRecord));
+
+        $incident->status->setSuppressed();
+        $incident->save();
+
+        $this->assertCount(1, $source->findSnapshotHistory($snapshotRecord));
+    }
+
+    public function testFinsStoredBySnapshotByPK()
+    {
+        $snapshot = $this->makeSnapshot('custom error', 777);
+
+        /** @var IncidentSource $source */
+        $source = $this->container->get(IncidentSource::class);
+
+        $snapshotRecord = $this->handleSnapshot($snapshot, true);
+        $snapshotRecord = $this->handleSnapshot($snapshot, true);
+
+        /** @var IncidentRecord $incident */
+        $incident = $source->find()->orderBy('time_created', 'ASC')->findOne();
+        $this->assertNotEmpty($incident);
+
+        $this->assertNotEmpty(
+            $source->findStoredBySnapshotByPK($snapshotRecord, $incident->primaryKey())
+        );
+
+        //Change status
+        $incident->status->setSuppressed();
+        $incident->save();
+
+        $this->assertEmpty(
+            $source->findStoredBySnapshotByPK($snapshotRecord, $incident->primaryKey())
+        );
+
+        //Correct id
+        $this->assertEmpty(
+            $source->findStoredBySnapshotByPK($snapshotRecord, $incident->primaryKey() + 20)
+        );
+
+        //Change hash and change status back
+        $snapshotRecord->exception_hash = 'some hash';
+        $snapshotRecord->save();
+
+        $incident->status->setStored();
+        $incident->save();
+
+        $this->assertEmpty(
+            $source->findStoredBySnapshotByPK($snapshotRecord, $incident->primaryKey())
+        );
+    }
+
+    public function testFindBySnapshotByPK()
+    {
+        $snapshot = $this->makeSnapshot('custom error', 777);
+
+        /** @var IncidentSource $source */
+        $source = $this->container->get(IncidentSource::class);
+
+        $snapshotRecord = $this->handleSnapshot($snapshot, true);
+        $snapshotRecord = $this->handleSnapshot($snapshot, true);
+
+        /** @var IncidentRecord $incident */
+        $incident = $source->find()->orderBy('time_created', 'ASC')->findOne();
+        $this->assertNotEmpty($incident);
+
+        $this->assertNotEmpty(
+            $source->findBySnapshotByPK($snapshotRecord, $incident->primaryKey())
+        );
+
+        //Correct id
+        $this->assertEmpty(
+            $source->findBySnapshotByPK($snapshotRecord, $incident->primaryKey() + 20)
+        );
+
+        //Change hash
+        $snapshotRecord->exception_hash = 'some hash';
+        $snapshotRecord->save();
+
+        $this->assertEmpty(
+            $source->findBySnapshotByPK($snapshotRecord, $incident->primaryKey())
+        );
+    }
+
     /**
      * @param IncidentSource $source
      * @return IncidentRecord

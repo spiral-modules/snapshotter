@@ -21,7 +21,7 @@
 
     <filter>
         <whitelist>
-            <directory>source/Snapshotter</directory>
+            <directory>source/Snapshotter/</directory>
         </whitelist>
     </filter>
 </phpunit>

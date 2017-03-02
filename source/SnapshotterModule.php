@@ -36,7 +36,7 @@ class SnapshotterModule implements ModuleInterface
         $registrator->configure('databases', 'databases', 'spiral/snapshotter', [
             "'snapshotter' => [",
             "   'connection'  => 'runtime',",
-            "   'tablePrefix' => 'snapshotter_'",
+            "   'tablePrefix' => 'snapshots_'",
             "   /*{{databases.snapshotter}}*/",
             "],",
         ]);

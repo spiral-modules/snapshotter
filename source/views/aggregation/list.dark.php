@@ -2,6 +2,7 @@
 /**
  * @var \Spiral\ORM\Entities\RecordSelector                            $selector
  * @var \Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord $entity
+ * @var \Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord $lastSnapshot
  * @var \Spiral\Snapshotter\Helpers\Timestamps                         $timestamps
  * @var \Spiral\Snapshotter\Helpers\Names                              $names
  */
@@ -27,8 +28,8 @@
             <div class="row">
                 <div class="col s12 m10">
                     <p><?= $lastSnapshot->last_incident->getExceptionTeaser() ?></p>
-                    <p class="grey-text"><?= $timestamps->timeOccurred($lastSnapshot) ?>
-                        (<?= $timestamps->timeOccurred($lastSnapshot, true) ?>)</p>
+                    <p class="grey-text"><?= $timestamps->getTime($lastSnapshot->time_created) ?>
+                        (<?= $timestamps->getTime($lastSnapshot->time_created, true) ?>)</p>
                 </div>
                 <div class="col s12 m2 right-align">
                     <vault:guard permission="vault.snapshots.view">
@@ -46,8 +47,11 @@
     <vault:grid source="<?= $selector ?>" as="entity" color="teal">
         <grid:cell label="[[ID:]]" value="<?= $entity->id ?>"/>
         <grid:cell label="[[Last occurred:]]">
-            <span title="<?= $timestamps->lastOccurred($entity, true) ?>">
-                <?= $timestamps->lastOccurred($entity) ?>
+            <span title="<?= $timestamps->getTime(
+                $entity->getLastIncident()->time_created,
+                true
+            ) ?>">
+                <?= $timestamps->getTime($entity->getLastIncident()->time_created) ?>
             </span>
         </grid:cell>
         <grid:cell label="[[Message:]]">

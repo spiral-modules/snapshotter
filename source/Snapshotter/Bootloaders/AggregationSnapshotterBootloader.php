@@ -16,8 +16,8 @@ class AggregationSnapshotterBootloader extends Bootloader
      * {@inheritdoc}
      */
     const BINDINGS = [
-        HandlerInterface::class               => AggregationHandler::class,
+        HandlerInterface::class   => AggregationHandler::class,
         AbstractController::class => SnapshotsController::class,
-        SnapshotInterface::class              => DelegateSnapshot::class
+        SnapshotInterface::class  => DelegateSnapshot::class
     ];
 }
