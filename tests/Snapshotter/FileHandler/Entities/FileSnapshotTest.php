@@ -16,5 +16,6 @@ class FileSnapshotTest extends BaseTest
         $this->assertEquals(basename($filename), $entity->id());
         $this->assertEquals($filename, $entity->path());
         $this->assertInstanceOf(FileTimestamp::class, $entity->timestamp());
+        $this->assertNotEmpty($entity->size());
     }
 }
