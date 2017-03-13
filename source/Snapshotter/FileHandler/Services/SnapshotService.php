@@ -6,6 +6,7 @@ use Spiral\Core\Service;
 use Spiral\Debug\Configs\SnapshotConfig;
 use Spiral\Files\FileManager;
 use Spiral\Snapshotter\FileHandler\Entities\FileSnapshot;
+use Spiral\Snapshotter\FileHandler\Sources\ArraySource;
 
 class SnapshotService extends Service
 {
@@ -30,15 +31,15 @@ class SnapshotService extends Service
     /**
      * Get snapshots.
      *
-     * @return array
+     * @return ArraySource
      */
-    public function getSnapshots()
+    public function getSnapshots(): ArraySource
     {
         $order = [];
         $snapshots = [];
 
         if (!$this->files->exists($this->config->reportingDirectory())) {
-            return [];
+            return new ArraySource();
         }
 
         foreach ($this->files->getFiles($this->config->reportingDirectory(), '*.html') as $file) {
@@ -48,7 +49,7 @@ class SnapshotService extends Service
 
         array_multisort($order, SORT_DESC, $snapshots);
 
-        return $snapshots;
+        return new ArraySource($snapshots);
     }
 
     /**
