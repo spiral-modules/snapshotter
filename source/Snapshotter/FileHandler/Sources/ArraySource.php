@@ -32,17 +32,15 @@ class ArraySource extends Component implements \Countable, PaginatorAwareInterfa
      */
     public function run(bool $paginate = true): array
     {
-        $clone = clone $this;
-
-        if ($paginate && $clone->hasPaginator()) {
+        if ($paginate && $this->hasPaginator()) {
             return array_slice(
-                $clone->source,
-                $clone->getPaginator()->getOffset(),
-                $clone->getPaginator()->getLimit()
+                $this->source,
+                $this->getPaginator()->getOffset(),
+                $this->getPaginator()->getLimit()
             );
         }
 
-        return $clone->source;
+        return $this->source;
     }
 
     /**
