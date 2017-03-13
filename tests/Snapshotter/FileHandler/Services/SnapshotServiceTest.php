@@ -4,6 +4,7 @@ namespace Spiral\Tests\Snapshotter\FileHandler\Services;
 
 use Spiral\Snapshotter\FileHandler\Entities\FileSnapshot;
 use Spiral\Snapshotter\FileHandler\Services\SnapshotService;
+use Spiral\Snapshotter\FileHandler\Sources\ArraySource;
 use Spiral\Tests\BaseTest;
 
 class SnapshotServiceTest extends BaseTest
@@ -17,6 +18,7 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         $this->assertCount(1, $service->getSnapshots());
+        $this->assertInstanceOf(ArraySource::class, $service->getSnapshots());
 
         sleep(1);
         $snapshot = $this->makeSnapshot('Message2', 456);
@@ -34,7 +36,7 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         /** @var FileSnapshot $file */
-        $file = $service->getSnapshots()[0];
+        $file = current($service->getSnapshots()->iterate());
         $this->assertInstanceOf(FileSnapshot::class, $file);
         $filename = $file->id();
 
@@ -51,7 +53,7 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         /** @var FileSnapshot $file */
-        $file = $service->getSnapshots()[0];
+        $file = current($service->getSnapshots()->iterate());
 
         $this->assertNotEmpty($service->read($file));
     }
@@ -65,7 +67,7 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         /** @var FileSnapshot $file */
-        $file = $service->getSnapshots()[0];
+        $file = current($service->getSnapshots()->iterate());
 
         $this->assertTrue($service->exists($file->id()));
         $this->assertFalse($service->exists('some name'));
@@ -80,7 +82,7 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         /** @var FileSnapshot $file */
-        $file = $service->getSnapshots()[0];
+        $file = current($service->getSnapshots()->iterate());
 
         $this->assertTrue($service->exists($file->id()));
 

@@ -16,6 +16,9 @@ class ArraySource extends Component implements \Countable, PaginatorAwareInterfa
     /** @var int */
     private $cursor;
 
+    /** @var array */
+    private $keys = [];
+
     /**
      * ArraySource constructor.
      *
@@ -24,13 +27,14 @@ class ArraySource extends Component implements \Countable, PaginatorAwareInterfa
     public function __construct(array $source = [])
     {
         $this->source = $source;
+        $this->keys = array_keys($this->source);
     }
 
     /**
      * @param bool $paginate
      * @return array
      */
-    public function run(bool $paginate = true): array
+    public function iterate(bool $paginate = true): array
     {
         if ($paginate && $this->hasPaginator()) {
             return array_slice(
@@ -44,21 +48,13 @@ class ArraySource extends Component implements \Countable, PaginatorAwareInterfa
     }
 
     /**
-     * @return array
-     */
-    public function getIterator(): array
-    {
-        return $this->run();
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @return int
      */
     public function count(): int
     {
-        return count($this->run(false));
+        return count($this->iterate(false));
     }
 
     /**
@@ -68,7 +64,10 @@ class ArraySource extends Component implements \Countable, PaginatorAwareInterfa
      */
     public function current()
     {
-        return $this->source[$this->cursor];
+        $offset = $this->hasPaginator() ? $this->getPaginator()->getOffset() : 0;
+        $key = $this->keys[$this->key() + $offset];
+
+        return $this->source[$key];
     }
 
     /**
@@ -96,7 +95,7 @@ class ArraySource extends Component implements \Countable, PaginatorAwareInterfa
      */
     public function valid(): bool
     {
-        return $this->cursor < count($this->run());
+        return $this->key() < count($this->iterate());
     }
 
     /**
