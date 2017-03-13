@@ -16,6 +16,7 @@ use Spiral\Snapshotter\AggregationHandler\Services\SnapshotService;
 use Spiral\Snapshotter\Helpers\Names;
 use Spiral\Snapshotter\Helpers\Timestamps;
 
+use Spiral\Statistics\Extract;
 use Spiral\Vault\Vault;
 use Spiral\Views\ViewManager;
 
@@ -33,10 +34,15 @@ class SnapshotsController extends AbstractController
      * @param SnapshotSource $source
      * @param Timestamps     $timestamps
      * @param Names          $names
+     * @param Extract        $extract
      * @return string
      */
-    public function indexAction(SnapshotSource $source, Timestamps $timestamps, Names $names)
-    {
+    public function indexAction(
+        SnapshotSource $source,
+        Timestamps $timestamps,
+        Names $names,
+        Extract $extract
+    ) {
         $selector = $source->findWithLast()->orderBy(
             'last_incident.time_created',
             SelectQuery::SORT_DESC

@@ -23,6 +23,9 @@
 </define:actions>
 
 <define:content>
+    <vault:card title="[[Statistics:]]">
+    </vault:card>
+
     <?php if (!empty($lastSnapshot)) { ?>
         <vault:card title="[[Last Snapshot:]]">
             <div class="row">
