@@ -6,7 +6,7 @@ use Spiral\Core\Service;
 use Spiral\Debug\Configs\SnapshotConfig;
 use Spiral\Files\FileManager;
 use Spiral\Snapshotter\FileHandler\Entities\FileSnapshot;
-use Spiral\Snapshotter\FileHandler\Sources\ArraySource;
+use Vvval\Spiral\PaginableArray;
 
 class SnapshotService extends Service
 {
@@ -31,15 +31,15 @@ class SnapshotService extends Service
     /**
      * Get snapshots.
      *
-     * @return ArraySource
+     * @return PaginableArray
      */
-    public function getSnapshots(): ArraySource
+    public function getSnapshots(): PaginableArray
     {
         $order = [];
         $snapshots = [];
 
         if (!$this->files->exists($this->config->reportingDirectory())) {
-            return new ArraySource();
+            return new PaginableArray();
         }
 
         foreach ($this->files->getFiles($this->config->reportingDirectory(), '*.html') as $file) {
@@ -49,7 +49,7 @@ class SnapshotService extends Service
 
         array_multisort($order, SORT_DESC, $snapshots);
 
-        return new ArraySource($snapshots);
+        return new PaginableArray($snapshots);
     }
 
     /**

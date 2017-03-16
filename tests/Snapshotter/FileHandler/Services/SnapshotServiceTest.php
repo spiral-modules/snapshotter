@@ -4,7 +4,6 @@ namespace Spiral\Tests\Snapshotter\FileHandler\Services;
 
 use Spiral\Snapshotter\FileHandler\Entities\FileSnapshot;
 use Spiral\Snapshotter\FileHandler\Services\SnapshotService;
-use Spiral\Snapshotter\FileHandler\Sources\ArraySource;
 use Spiral\Tests\BaseTest;
 
 class SnapshotServiceTest extends BaseTest
@@ -18,7 +17,6 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         $this->assertCount(1, $service->getSnapshots());
-        $this->assertInstanceOf(ArraySource::class, $service->getSnapshots());
 
         sleep(1);
         $snapshot = $this->makeSnapshot('Message2', 456);

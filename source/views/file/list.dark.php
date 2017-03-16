@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \Spiral\Snapshotter\FileHandler\Sources\ArraySource   $selector
+ * @var \Vvval\Spiral\PaginableArray                          $selector
  * @var \Spiral\Snapshotter\FileHandler\Entities\FileSnapshot $entity
  * @var \Spiral\Snapshotter\Helpers\Timestamps                $timestamps
  */
