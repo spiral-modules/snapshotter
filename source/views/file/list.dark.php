@@ -1,6 +1,6 @@
 <?php
 /**
- * @var array                                                 $selector
+ * @var \Vvval\Spiral\PaginableArray                          $selector
  * @var \Spiral\Snapshotter\FileHandler\Entities\FileSnapshot $entity
  * @var \Spiral\Snapshotter\Helpers\Timestamps                $timestamps
  */
@@ -9,7 +9,7 @@
 
 <define:actions>
     <vault:guard permission="vault.snapshots.removeAll">
-        <?php if (count($selector)) { ?>
+        <?php if ($selector->count()) { ?>
             <vault:uri target="snapshots:removeAll" icon="delete"
                        class="btn red waves-effect waves-light">
                 [[Remove all]]

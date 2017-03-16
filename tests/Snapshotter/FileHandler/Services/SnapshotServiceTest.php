@@ -34,7 +34,7 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         /** @var FileSnapshot $file */
-        $file = $service->getSnapshots()[0];
+        $file = current($service->getSnapshots()->iterate());
         $this->assertInstanceOf(FileSnapshot::class, $file);
         $filename = $file->id();
 
@@ -51,7 +51,7 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         /** @var FileSnapshot $file */
-        $file = $service->getSnapshots()[0];
+        $file = current($service->getSnapshots()->iterate());
 
         $this->assertNotEmpty($service->read($file));
     }
@@ -65,7 +65,7 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         /** @var FileSnapshot $file */
-        $file = $service->getSnapshots()[0];
+        $file = current($service->getSnapshots()->iterate());
 
         $this->assertTrue($service->exists($file->id()));
         $this->assertFalse($service->exists('some name'));
@@ -80,7 +80,7 @@ class SnapshotServiceTest extends BaseTest
         $service = $this->container->get(SnapshotService::class);
 
         /** @var FileSnapshot $file */
-        $file = $service->getSnapshots()[0];
+        $file = current($service->getSnapshots()->iterate());
 
         $this->assertTrue($service->exists($file->id()));
 

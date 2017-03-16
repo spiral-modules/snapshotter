@@ -32,7 +32,7 @@ class SnapshotsController extends AbstractController
         $snapshots = $service->getSnapshots();
 
         return $this->views->render('snapshotter:file/list', [
-            'selector'   => $snapshots,
+            'selector'   => $snapshots->paginate(20),
             'timestamps' => $timestamps
         ]);
     }
