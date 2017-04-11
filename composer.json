@@ -1,5 +1,6 @@
 {
   "name": "spiral/snapshotter",
+  "license": "MIT",
   "description": "Snapshot component with ability to view, delete and aggregate snapshots.",
   "authors": [
     {
@@ -9,7 +10,7 @@
   ],
   "require": {
     "php": ">=7.0",
-    "spiral/framework": "^0.9.10",
+    "spiral/framework": "^1.0.0",
     "nesbot/carbon": "^1.22",
     "spiral/vault": "^0.9.0",
     "vvval/spiral-array-paginable": "^0.1.0"
