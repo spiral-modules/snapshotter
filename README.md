@@ -15,10 +15,10 @@ spiral register spiral/snapshotter
 ### Include snapshots controller link into navigation menu like below (optional):
 
 ```php
-    'snapshots' => [
-        'title' => 'Snapshots',
-        'requires' => 'vault.snapshots'
-    ],
+'snapshots' => [
+    'title' => 'Snapshots',
+    'requires' => 'vault.snapshots'
+],
 ```
 
 ### Select one of provided handlers
