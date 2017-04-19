@@ -12,17 +12,13 @@ Snapshots management module. Can store snapshot in database or in files, allows 
 composer require spiral/snapshotter
 spiral register spiral/snapshotter
 ```
-### Include snapshots controller link into navigation menu (optional)
+### Include snapshots controller link into navigation menu like below (optional):
 
-Be sure that you have `navigation.vault` placeholder in `modules/vault` config like this
 ```php
-'vault'    => [
-    'title' => 'Vault',
-    'icon'  => 'power_settings_new',
-    'items' => [
-        /*{{navigation.vault}}*/
-    ]
-]
+    'snapshots' => [
+        'title' => 'Snapshots',
+        'requires' => 'vault.snapshots'
+    ],
 ```
 
 ### Select one of provided handlers

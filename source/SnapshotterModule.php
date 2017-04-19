@@ -45,15 +45,6 @@ class SnapshotterModule implements ModuleInterface
         $registrator->configure('modules/vault', 'controllers', 'spiral/snapshotter', [
             "'snapshots' => \\Spiral\\Snapshotter\\AbstractController::class,",
         ]);
-
-        //Register menu item in navigation config
-        $registrator->configure('modules/vault', 'navigation.vault', 'spiral/snapshotter', [
-            "'snapshots' => [",
-            "    'title'    => 'Snapshots',",
-            "    'requires' => 'vault.snapshots'",
-            "]",
-            "/*{{navigation.vault.snapshots}}*/",
-        ]);
     }
 
     /**
