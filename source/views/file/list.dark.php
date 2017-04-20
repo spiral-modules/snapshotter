@@ -41,12 +41,12 @@
 
         <grid:cell style="text-align:right">
             <vault:guard permission="vault.snapshots.view">
-                <vault:uri target="snapshots:view" icon="edit"
+                <vault:uri target="snapshots:view" icon="import_contacts" title="[[View snapshot]]"
                            options="<?= ['filename' => $entity->id()] ?>"
                            class="btn-flat waves-effect"/>
             </vault:guard>
             <vault:guard permission="vault.snapshots.remove">
-                <vault:uri target="snapshots:remove" icon="delete"
+                <vault:uri target="snapshots:remove" icon="delete" title="[[Remove snapshot]]"
                            class="btn red waves-effect waves-light"
                            options="<?= ['filename' => $entity->id()] ?>"/>
             </vault:guard>

@@ -33,7 +33,7 @@
                 </div>
                 <div class="col s12 m2 right-align">
                     <vault:guard permission="vault.snapshots.view">
-                        <vault:uri target="snapshots:view" icon="edit"
+                        <vault:uri target="snapshots:view" icon="import_contacts"
                                    class="btn teal waves-effect waves-light"
                                    options="<?= ['id' => $lastSnapshot->primaryKey()] ?>">
                             [[View last]]
@@ -94,14 +94,12 @@
 
         <grid:cell style="text-align:right">
             <vault:guard permission="vault.snapshots.view">
-                <vault:uri target="snapshots:view" icon="edit"
+                <vault:uri target="snapshots:view" icon="import_contacts" title="[[View snapshot]]"
                            options="<?= ['id' => $entity->primaryKey()] ?>"
-                           class="btn-flat waves-effect"/>
+                           class="btn teal waves-effect"/>
             </vault:guard>
-        </grid:cell>
-        <grid:cell style="text-align:right">
             <vault:guard permission="vault.snapshots.remove">
-                <vault:uri target="snapshots:remove" icon="delete"
+                <vault:uri target="snapshots:remove" icon="delete" title="[[Remove snapshot]]"
                            class="btn red waves-effect waves-light"
                            options="<?= ['id' => $entity->primaryKey()] ?>"/>
             </vault:guard>

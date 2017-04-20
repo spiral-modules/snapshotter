@@ -21,11 +21,13 @@
 <define:actions>
     <vault:guard permission="vault.snapshots.edit">
         <?php if ($incident->status->isStored()) { ?>
-            <vault:uri target="snapshots:suppressIncident" class="btn teal waves-effect waves-light"
+            <vault:uri target="snapshots:suppressIncident"
+                       class="btn blue-grey darken-2 waves-effect waves-light" icon="archive"
                        options="<?= [
                            'id'       => $snapshot->primaryKey(),
                            'incident' => $incident->primaryKey()
-                       ] ?>">[[Suppress]]
+                       ] ?>">
+                [[Suppress]]
             </vault:uri>
         <?php } ?>
 

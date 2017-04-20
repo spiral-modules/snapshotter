@@ -154,31 +154,32 @@
                     <grid:cell style="text-align:right">
                         <?php if ($entity->status->isStored()) { ?>
                             <vault:guard permission="vault.snapshots.view">
-                                <vault:uri target="snapshots:incident" icon="edit"
-                                           class="btn-flat waves-effect" options="<?= [
+                                <vault:uri target="snapshots:incident" icon="import_contacts"
+                                           title="[[View incident]]"
+                                           class="btn waves-effect teal text-left" options="<?= [
                                     'id'       => $snapshot->primaryKey(),
                                     'incident' => $entity->primaryKey(),
                                 ] ?>"/>
                             </vault:guard>
                             <vault:guard permission="vault.snapshots.edit">
-                                <vault:uri target="snapshots:suppressIncident"
-                                           class="btn teal waves-effect waves-light" options="<?= [
-                                    'id'       => $snapshot->primaryKey(),
-                                    'incident' => $entity->primaryKey(),
-                                ] ?>">[[Suppress]]
-                                </vault:uri>
+                                <vault:uri target="snapshots:suppressIncident" icon="archive"
+                                           title="[[Suppress incident]]"
+                                           class="btn blue-grey darken-2 waves-effect waves-light"
+                                           options="<?= [
+                                               'id'       => $snapshot->primaryKey(),
+                                               'incident' => $entity->primaryKey(),
+                                           ] ?>"></vault:uri>
                             </vault:guard>
                         <?php }
 
                         if (!$entity->status->isDeleted()) { ?>
                             <vault:guard permission="vault.snapshots.edit">
                                 <vault:uri target="snapshots:removeIncident" icon="delete"
+                                           title="[[Remove incident]]"
                                            class="btn red waves-effect waves-light" options="<?= [
                                     'id'       => $snapshot->primaryKey(),
                                     'incident' => $entity->primaryKey(),
-                                ] ?>">
-                                    [[Remove]]
-                                </vault:uri>
+                                ] ?>"/>
                             </vault:guard>
                         <?php } ?>
                     </grid:cell>
