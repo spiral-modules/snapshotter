@@ -252,7 +252,7 @@ class SnapshotsController extends AbstractController
         $incident->save();
 
         $uri = $this->vault
-            ->uri('snapshots:edit', ['id' => $snapshot->primaryKey()])
+            ->uri('snapshots:view', ['id' => $snapshot->primaryKey()])
             ->withFragment('history');
 
         if ($this->input->isAjax()) {
@@ -368,7 +368,7 @@ class SnapshotsController extends AbstractController
         $incident->delete();
 
         $uri = $this->vault
-            ->uri('snapshots:edit', ['id' => $snapshot->primaryKey()])
+            ->uri('snapshots:view', ['id' => $snapshot->primaryKey()])
             ->withFragment('history');
 
         if ($this->input->isAjax()) {
