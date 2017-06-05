@@ -41,7 +41,7 @@
             </vault:uri>
         <?php } ?>
     </vault:guard>
-    <vault:uri target="snapshots" class="btn-flat teal-text waves-effect" post-icon="trending_flat">
+    <vault:uri target="snapshots" class="btn-flat  waves-effect" post-icon="trending_flat">
         [[BACK]]
     </vault:uri>
 </define:actions>
@@ -107,7 +107,7 @@
                                 <p class="grey-text">[[When enabled, snapshot incident history records will be created without source stored.]]</p>
                                 <div class="right-align">
                                     <input type="submit" value="[[Update]]"
-                                           class="btn teal waves-effect"/>
+                                           class="btn  waves-effect"/>
                                 </div>
                             </spiral:form>
                         <?php } else {
@@ -138,7 +138,7 @@
                 <p class="card-panel-title">[[You have only
                     <a href="#last">one</a> snapshot occurred.]]</p>
             <?php } else { ?>
-                <vault:grid source="<?= $selector ?>" as="entity" color="teal">
+                <vault:grid source="<?= $selector ?>" as="entity" color="">
                     <grid:cell label="[[ID:]]" value="<?= $entity->primaryKey() ?>"/>
 
                     <grid:cell label="[[Occurred:]]">
@@ -156,7 +156,7 @@
                             <vault:guard permission="vault.snapshots.view">
                                 <vault:uri target="snapshots:incident" icon="import_contacts"
                                            title="[[View incident]]"
-                                           class="btn waves-effect teal text-left" options="<?= [
+                                           class="btn waves-effect  text-left" options="<?= [
                                     'id'       => $snapshot->primaryKey(),
                                     'incident' => $entity->primaryKey(),
                                 ] ?>"/>

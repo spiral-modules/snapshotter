@@ -19,7 +19,7 @@
 </define:actions>
 
 <define:content>
-    <vault:grid source="<?= $selector ?>" as="entity" color="teal">
+    <vault:grid source="<?= $selector ?>" as="entity" color="">
         <grid:cell label="[[Last occurred:]]">
             <span>
                 <?= $timestamps->getTime($entity->timestamp()) ?>
@@ -43,7 +43,7 @@
             <vault:guard permission="vault.snapshots.view">
                 <vault:uri target="snapshots:view" icon="import_contacts" title="[[View snapshot]]"
                            options="<?= ['filename' => $entity->id()] ?>"
-                           class="btn-flat waves-effect"/>
+                           class="btn waves-effect"/>
             </vault:guard>
             <vault:guard permission="vault.snapshots.remove">
                 <vault:uri target="snapshots:remove" icon="delete" title="[[Remove snapshot]]"

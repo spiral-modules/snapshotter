@@ -32,7 +32,7 @@
             [[Remove]]
         </vault:uri>
     </vault:guard>
-    <vault:uri target="snapshots" class="btn-flat teal-text waves-effect" post-icon="trending_flat">
+    <vault:uri target="snapshots" class="btn-flat  waves-effect" post-icon="trending_flat">
         [[BACK]]
     </vault:uri>
 </define:actions>

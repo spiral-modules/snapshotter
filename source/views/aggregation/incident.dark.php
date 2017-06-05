@@ -31,7 +31,7 @@
             </vault:uri>
         <?php } ?>
 
-        <vault:uri target="snapshots:view" class="btn-flat teal-text waves-effect"
+        <vault:uri target="snapshots:view" class="btn-flat  waves-effect"
                    post-icon="trending_flat" options="<?= ['id' => $snapshot->primaryKey()] ?>">
             [[BACK]]
         </vault:uri>
