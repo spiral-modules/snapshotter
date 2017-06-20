@@ -36,7 +36,7 @@ class SnapshotRecord extends Record
         'suppression'    => 'bool',
 
         //exception teaser
-        'exception_hash' => 'string',
+        'exception_hash' => 'string(128)',
 
         //counters
         'count_occurred' => 'int',

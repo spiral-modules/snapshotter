@@ -43,7 +43,7 @@ class IncidentRecord extends Record
         'status'              => IncidentStatus::class,
 
         //exception fields
-        'exception_hash'      => 'string',
+        'exception_hash'      => 'string(128)',
         'exception_source'    => 'longText, nullable',
         'exception_teaser'    => 'string',
         'exception_classname' => 'string',
