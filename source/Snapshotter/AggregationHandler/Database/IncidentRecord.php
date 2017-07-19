@@ -96,7 +96,7 @@ class IncidentRecord extends Record
             return null;
         }
 
-        return ($this->exception_source);
+        return gzdecode($this->exception_source);
     }
 
     /**
