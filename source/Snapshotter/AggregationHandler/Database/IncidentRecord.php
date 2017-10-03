@@ -65,6 +65,7 @@ class IncidentRecord extends Record
      */
     const INDEXES = [
         [self::INDEX, 'exception_hash'],
+        [self::INDEX, 'exception_hash', 'status'],
     ];
 
     /**
