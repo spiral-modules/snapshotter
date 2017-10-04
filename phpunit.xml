@@ -22,6 +22,10 @@
     <filter>
         <whitelist>
             <directory>source/Snapshotter/</directory>
+            <exclude>
+                <directory suffix=".php">source/Snapshotter/AggregationHandler/Controllers</directory>
+                <directory suffix=".php">source/Snapshotter/FileHandler/Controllers</directory>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>
