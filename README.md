@@ -21,60 +21,51 @@ spiral register spiral/snapshotter
 ],
 ```
 
+### Include `SnapshotterBootloader`
+
+```php
+$this->getBootloader()->bootload([
+    \Spiral\Snapshotter\Bootloaders\SnapshotterBootloader::class
+]);
+```
+
 ### Select one of provided handlers
 
 Currently there are two supported handlers: `FileHandler` and `AggregationHandler`, choose onf of them and bind it:
 ```php
 $this->getBootloader()->bootload([
-    \Spiral\Snapshotter\Bootloaders\FileSnapshotterBootloader::class
+    \Spiral\Snapshotter\Bootloaders\FileHandlerBootloader::class
 ]);
 //OR:
 $this->getBootloader()->bootload([
-    \Spiral\Snapshotter\Bootloaders\AggregationSnapshotterBootloader::class
+    \Spiral\Snapshotter\Bootloaders\AggregationHandlerBootloader::class
 ]);
 ```
 
-## File Handler
-File handler stores snapshot files in runtime directory. All you need to do is add `FileSnapshotterBootloader` bootloader.
+Then you can remove standard `SnapshotInterface` binding (if included):
+```php
+//$this->container->bind(SnapshotInterface::class, Snapshotter\Debug\AggregatedSnapshot::class);
+```
 
-You can remove standard `SnapshotInterface` binding:
-```php
-$this->container->bind(SnapshotInterface::class, Snapshotter\Debug\AggregatedSnapshot::class);
-```
-Don't worry, it is placed in the bootloader already:
-```php
-class FileSnapshotterBootloader extends Bootloader
-{
-    /**
-     * {@inheritdoc}
-     */
-    const BINDINGS = [
-        HandlerInterface::class        => FileHandler::class,
-        AbstractController::class      => SnapshotsController::class,
-        Debug\SnapshotInterface::class => Debug\Snapshot::class
-    ];
-}
-```
+## File Handler
+File handler stores snapshot files in runtime directory. 
 
 ## Aggregation Handler
-Aggregation handler stores snapshots in database. All you need to do is add `AggregationSnapshotterBootloader` bootloader.
+Aggregation handler stores snapshots in database. Exception body is gzencoded
 
 ### Suppression
 
-Aggregation handler aggregates similar snapshot incidents groping them by snapshot teaser message, it allows you to easily manage snapshots if some of them occurred more than once.
-Aggregation handler supports suppression feature: it allows you to save space because new snapshot incidents will be stored with empty exception source. You will see all incidents, no reason to store all sources if you can find it in the last incident. If you want to store sources - just disable suppression.
+Aggregation handler aggregates similar snapshot incidents groping them by snapshot teaser message,
+it allows you to easily manage snapshots if some of them occurred more than once.
+Aggregation handler supports suppression feature:
+it allows you to save space because new snapshot incidents will be stored with empty exception source.
+You will see all incidents, no reason to store all sources if you can find it in the last incident.
+If you want to store sources - just disable suppression.
 > After suppression is enabled, only new incidents will be involved, old ones will be kept untouched. Same for disabled suppression.
 
 ### Define database connection.
 
-Aggregation handler uses database, by default it is set to `runtime` database:
-```php
-'snapshots' => [
-   'connection'  => 'runtime',
-   'tablePrefix' => 'snapshots_'
-   /*{{databases.snapshotter}}*/
-],
-```
+Aggregation handler uses database, by default it is set as an alias to the `default` database
 
 ---
 

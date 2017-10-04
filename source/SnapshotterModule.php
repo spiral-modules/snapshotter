@@ -1,4 +1,5 @@
 <?php
+
 namespace Spiral;
 
 use Spiral\Core\DirectoriesInterface;
@@ -33,12 +34,8 @@ class SnapshotterModule implements ModuleInterface
         ]);
 
         //Register database settings
-        $registrator->configure('databases', 'databases', 'spiral/snapshotter', [
-            "'snapshotter' => [",
-            "   'connection'  => 'runtime',",
-            "   'tablePrefix' => 'snapshots_'",
-            "   /*{{databases.snapshotter}}*/",
-            "],",
+        $registrator->configure('databases', 'aliases', 'spiral/snapshotter', [
+            "'snapshots' => 'default',"
         ]);
 
         //Register controller in navigation config

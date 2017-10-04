@@ -39,7 +39,7 @@ class TestApplication extends Core
 
     protected function bootstrap()
     {
-        //Nothing to do
+        //$this->environment->set("DEBUG",true);
     }
 
     /**

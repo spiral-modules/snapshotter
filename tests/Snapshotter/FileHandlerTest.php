@@ -3,10 +3,7 @@
 namespace Spiral\Tests\Snapshotter;
 
 use Spiral\Debug\Configs\SnapshotConfig;
-use Spiral\Snapshotter\AggregationHandler;
-use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
-use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
-use Spiral\Snapshotter\Bootloaders\FileSnapshotterBootloader;
+use Spiral\Snapshotter\Bootloaders\FileHandlerBootloader;
 use Spiral\Snapshotter\DelegateSnapshot;
 use Spiral\Tests\BaseTest;
 
@@ -14,7 +11,7 @@ class FileHandlerTest extends BaseTest
 {
     public function testFileRender()
     {
-        $this->app->getBootloader()->bootload([FileSnapshotterBootloader::class]);
+        $this->app->getBootloader()->bootload([FileHandlerBootloader::class]);
 
         $snapshot = $this->makeSnapshot('File error', 123);
         /** @var DelegateSnapshot $delegate */
