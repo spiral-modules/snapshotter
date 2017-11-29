@@ -44,7 +44,7 @@ class IncidentRecord extends Record
 
         //exception fields
         'exception_hash'      => 'string(128)',
-        'exception_source'    => 'longText, nullable',
+        'exception_source'    => 'longBinary, nullable',
         'exception_teaser'    => 'string',
         'exception_classname' => 'string',
         'exception_message'   => 'string',
