@@ -8,7 +8,6 @@ use Spiral\Snapshotter\AggregationHandler\Database\IncidentRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\SnapshotRecord;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\SnapshotSource;
 use Spiral\Snapshotter\AggregationHandler\Database\Sources\IncidentSource;
-use Spiral\Snapshotter\AggregationHandler\Database\Types\IncidentStatus;
 
 class SnapshotService extends Service
 {
