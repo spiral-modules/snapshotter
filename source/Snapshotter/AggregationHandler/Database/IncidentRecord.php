@@ -6,6 +6,7 @@ use Spiral\Models\Accessors\SqlTimestamp;
 use Spiral\Models\Traits\TimestampsTrait;
 use Spiral\ORM\Entities\Relations\HasOneRelation;
 use Spiral\ORM\Record;
+use Spiral\ORM\TransactionInterface;
 use Spiral\Snapshotter\AggregationHandler\Database\Types\IncidentStatus;
 
 /**
@@ -78,9 +79,9 @@ class IncidentRecord extends Record
     }
 
     /**
-     * Delete override.
+     * {@inheritDoc}
      */
-    public function delete()
+    public function delete(TransactionInterface $transaction = null)
     {
         $this->status->setDeleted();
         $this->exception_source = null;
