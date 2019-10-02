@@ -11,7 +11,7 @@
   "require": {
     "php": ">=7.0",
     "spiral/framework": "^1.0.0",
-    "nesbot/carbon": "^2.0.0",
+    "nesbot/carbon": "1.0",
     "spiral/vault": "^0.9.7",
     "vvval/spiral-array-paginable": "^0.1.0"
   },
